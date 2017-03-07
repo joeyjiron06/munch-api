@@ -32,6 +32,7 @@ describe('Feeds', () => {
 
     it('should return null if an invalid xml is specified', () => {
       expect(Feeds.atom('')).to.be.null;
+      expect(Feeds.atom('bad data!')).to.be.null;
       expect(Feeds.atom(null)).to.be.null;
       expect(Feeds.atom(undefined)).to.be.null;
       expect(Feeds.atom(12)).to.be.null;
