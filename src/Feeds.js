@@ -1,6 +1,25 @@
 const parser = require('xml2json');
 
+const PARSER_OPTIONS = {
+  object:true,
+  sanitize: true,
+  trim: true
+};
+
+
 class Feeds {
+
+  /**
+   *
+   * @param {string} str
+   * @return {*|null} the image url extracted from the string
+   */
+  static image(str) {
+    str = str || '';
+    let imgMatch = str.match(/src="[\w\W]+?"/) || '';
+    let img_url = (imgMatch[0] || '').replace('src="', '').replace('"', '');
+    return img_url || null;
+  }
 
   /**
    * Convert an atom rss feed to the proper json structure for the REST API
@@ -11,11 +30,7 @@ class Feeds {
     let feed;
 
     try {
-      feed = parser.toJson(xml, {
-        object:true,
-        sanitize: true,
-        trim: true
-      }).feed;
+      feed = parser.toJson(xml, PARSER_OPTIONS).feed;
     } catch (e) {}
 
     // bad data - return null
@@ -37,28 +52,21 @@ class Feeds {
     }
 
     // map the entries
-    entries = entries.map((entry) => {
+    let items = entries.map((entry) => {
       entry.link = entry.link || {};
-
-      // try to extract image url
-      let img_url = null;
-      let content =  (entry.content || {}).$t || '';
-      let imgMatch = content.match(/src="[\w\W]+?"/) || '';
-      if (imgMatch[0]) {
-        img_url = imgMatch[0].replace('src="', '').replace('"', '');
-      }
+      entry.content = entry.content || {};
 
       return {
         title: entry.title || null,
         link: entry.link.href || null,
-        img_url,
+        img_url: Feeds.image(entry.content.$t),
       }
     });
 
 
     return {
-      source: source,
-      items : entries
+      source,
+      items
     };
   }
 
@@ -71,11 +79,7 @@ class Feeds {
     let channel;
 
     try {
-      channel = parser.toJson(xml, {
-        object:true,
-        sanitize: true,
-        trim: true
-      }).rss.channel;
+      channel = parser.toJson(xml, PARSER_OPTIONS).rss.channel;
     } catch (e) {}
 
     // bad data - return null
@@ -96,18 +100,12 @@ class Feeds {
       items = [items];
     }
 
+    // map items
     items = items.map((item) => {
-      // TODO refector to separate function
-      let img_url = null;
-      let imgMatch = (item.description || '').match(/src="[\w\W]+?"/) || '';
-      if (imgMatch[0]) {
-        img_url = imgMatch[0].replace('src="', '').replace('"', '');
-      }
-
       return {
-        title : item.title || null,
+        title: item.title || null,
         link: item.link || null,
-        img_url
+        img_url: Feeds.image(item.description)
       }
     });
 
