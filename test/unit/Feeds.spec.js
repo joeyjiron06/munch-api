@@ -36,7 +36,20 @@ describe('Feeds', () => {
       });
     });
 
-    // invalid feed returns null
+    it('should return null if an invalid xml is specified', () => {
+      expect(Feeds.atom('')).to.be.null;
+      expect(Feeds.atom(null)).to.be.null;
+      expect(Feeds.atom(undefined)).to.be.null;
+      expect(Feeds.atom(12)).to.be.null;
+      expect(Feeds.atom({})).to.be.null;
+      expect(Feeds.atom(function(){})).to.be.null;
+    });
+
+    // TODO
+    // - error no link
+    // - no entries
+    // - entry with no link
+    // - entry with no img
 
   });
 

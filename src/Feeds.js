@@ -8,17 +8,23 @@ class Feeds {
 
   /**
    * Convert an atom rss feed to the proper json structure for the REST API
-   * @param {string} rawXML
+   * @param {string} xml
    * @return {object} an JSON object containing the properties of the feed.
    */
-  static atom(rawXML) {
-    let data = parser.toJson(rawXML, {
+  static atom(xml) {
+    if (typeof xml !== 'string') {
+      xml = '';
+    }
+
+    let feed = parser.toJson(xml, {
       object:true,
       sanitize: true,
       trim: true
-    });
+    }).feed;
 
-    let feed = data.feed;
+    if (!feed) {
+      return null;
+    }
 
     return {
       source: {
