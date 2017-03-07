@@ -7,15 +7,9 @@ describe('Feeds', () => {
 
 
   describe('atom', () => {
-    let atomXML;
-
-    before(() => {
-      atomXML = fs.readFileSync('test/fixtures/atom.feed.xml', 'utf8');
-    });
-
-
     it('should parse feeds into a json structure', () => {
-      let data =  Feeds.atom(atomXML);
+      let xml = fs.readFileSync('test/fixtures/atom.feed.xml', 'utf8');
+      let data =  Feeds.atom(xml);
 
       expect(data.source).to.deep.equal({
         title : 'The Verge - All Posts',
@@ -45,12 +39,26 @@ describe('Feeds', () => {
       expect(Feeds.atom(function(){})).to.be.null;
     });
 
-    // TODO
-    // - error no link
-    // - no entries
-    // - entry with no link
-    // - entry with no img
+    it('should return a json with no link when no link is specified', () => {
+      let xml = fs.readFileSync('test/fixtures/atom.feed.xml', 'utf8');
 
+      // remove the link from the fixture and make sure it still parses
+      xml = xml.replace('<link type="text/html" href="http://www.theverge.com/" rel="alternate"/>', '');
+      let data = Feeds.atom(xml);
+      expect(data.source.link).to.be.null;
+    });
+
+    it('should return an empty array when no entries are in xml', () => {
+      let xml = '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"></feed>';
+      let data = Feeds.atom(xml);
+      expect(data.items).to.have.length(0);
+    });
+
+    it('should return entries that dont have links', () => {
+      let xml = '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><entry><title>Test</title></entry></feed>';
+      let data = Feeds.atom(xml);
+      expect(data.items[0].title).to.equal('Test');
+    });
   });
 
 });

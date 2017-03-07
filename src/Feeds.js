@@ -1,6 +1,9 @@
 const parser = require('xml2json');
 
 function getImageUrl(entry) {
+  if (!entry.content) {
+    return null;
+  }
   return entry.content.$t.match(/src="[\w\W]+?"/)[0].replace('src="', '').replace('"', '');
 }
 
@@ -26,17 +29,25 @@ class Feeds {
       return null;
     }
 
+    feed.link = feed.link || {};
+    feed.entry = feed.entry || [];
+
+    // when there is only one item the parse set entry to the entry json, not an array
+    if (!Array.isArray(feed.entry)) {
+      feed.entry = [feed.entry];
+    }
+
     return {
       source: {
         title: feed.title,
         img_url: feed.icon,
-        link: feed.link.href
+        link: feed.link.href || null
       },
 
       items : feed.entry.map((entry) => {
         return {
           title: entry.title,
-          link: entry.link.href,
+          link: entry.link ? entry.link.href : null,
           img_url: getImageUrl(entry)
         }
       })
