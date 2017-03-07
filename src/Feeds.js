@@ -116,6 +116,19 @@ class Feeds {
   }
 
 
+  /**
+   * @param {string} xml
+   * @return {string|null} returns "atom", "rss", or null when it is neither.
+   */
+  static identify(xml) {
+    if (/<rss /i.test(xml)) {
+      return "rss";
+    } else if (/<feed /i.test(xml)) {
+      return "atom";
+    } else {
+      return null;
+    }
+  }
 }
 
 

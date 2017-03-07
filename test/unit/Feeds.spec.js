@@ -171,4 +171,32 @@ describe('Feeds', () => {
     });
   });
 
+
+  describe('identify', () => {
+    it('shuold return rss when rss feed is specified', () => {
+      let xml = `<?xml version="1.0"?>
+        <rss version="2.0" xmlns:dc="https://purl.org/dc/elements/1.1/"
+            xmlns:itunes="https://www.itunes.com/dtds/podcast-1.0.dtd">
+        </rss>`;
+      expect(Feeds.identify(xml)).to.equal('rss');
+    });
+
+    it('shuold return atom when feed is specified', () => {
+      let xml = `<?xml version="1.0"?>
+        <?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+        </feed>`;
+      expect(Feeds.identify(xml)).to.equal('atom');
+    });
+
+    it('should return null when invalid param is passed in', () => {
+      expect(Feeds.identify('')).to.be.null;
+      expect(Feeds.identify('123')).to.be.null;
+      expect(Feeds.identify(null)).to.be.null;
+      expect(Feeds.identify(undefined)).to.be.null;
+      expect(Feeds.identify(23)).to.be.null;
+      expect(Feeds.identify({})).to.be.null;
+      expect(Feeds.identify(function(){})).to.be.null;
+    });
+  });
 });
