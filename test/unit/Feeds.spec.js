@@ -9,7 +9,7 @@ describe('Feeds', () => {
   describe('atom', () => {
     it('should parse feeds into a json structure', () => {
       let xml = fs.readFileSync('test/fixtures/atom.feed.xml', 'utf8');
-      let data =  Feeds.atom(xml);
+      let data = Feeds.atom(xml);
 
       expect(data.source).to.deep.equal({
         title : 'The Verge - All Posts',
@@ -59,6 +59,115 @@ describe('Feeds', () => {
       let xml = '<?xml version="1.0" encoding="UTF-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><entry><title>Test</title></entry></feed>';
       let data = Feeds.atom(xml);
       expect(data.items[0].title).to.equal('Test');
+    });
+
+    it('should return nulls for title, img_url, and link in ENTRY when there is no values', () => {
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+          <entry/>
+         </feed>
+      `;
+      let data = Feeds.atom(xml);
+      expect(data.items[0]).to.deep.equal({
+        title : null,
+        link : null,
+        img_url : null
+      });
+    });
+  });
+
+
+  describe('rss', () => {
+    it('should parse feeds into a json structure', () => {
+      let xml = fs.readFileSync('test/fixtures/rss.feed.xml', 'utf8');
+      let data = Feeds.rss(xml);
+
+      expect(data.source).to.deep.equal({
+        title : 'Engadget RSS Feed',
+        img_url : 'https://www.blogsmithmedia.com/www.engadget.com/media/feedlogo.gif?cachebust=true',
+        link : 'https://www.engadget.com/rss.xml'
+      });
+
+      expect(data.items[0]).to.deep.equal({
+        title : 'How to stop the Nintendo Switch\'s Joy-Con from losing sync',
+        link : 'https://www.engadget.com/2017/03/07/how-to-stop-the-nintendo-switchs-joy-con-from-losing-sync/',
+        img_url : 'https://s.aolcdn.com/dims-shared/dims3/GLOB/crop/1600x1049+0+0/resize/1600x1049!/format/jpg/quality/85/https://s.aolcdn.com/hss/storage/midas/9b8dc9fed589c7cd0a90dd138d485d31/204974161/Nintendo+Switch+preview+gallery+11.jpg'
+      });
+
+      expect(data.items[1]).to.deep.equal({
+        title : 'How Sonos made the new Playbase sound a lot better than it should',
+        link : 'https://www.engadget.com/2017/03/07/sonos-playbase-speaker-hands-on-behind-the-scenes/',
+        img_url : 'https://s.aolcdn.com/hss/storage/midas/bd85837ea7312b8381be4b38144d91cf/205017524/DSCF5843.jpg'
+      });
+    });
+
+    it('should return null if an invalid xml is specified', () => {
+      expect(Feeds.rss('')).to.be.null;
+      expect(Feeds.rss('bad data!')).to.be.null;
+      expect(Feeds.rss(null)).to.be.null;
+      expect(Feeds.rss(undefined)).to.be.null;
+      expect(Feeds.rss(12)).to.be.null;
+      expect(Feeds.rss({})).to.be.null;
+      expect(Feeds.rss(function(){})).to.be.null;
+    });
+
+    it('should return only one item when one item is in the xml', () => {
+      let xml = `<?xml version="1.0"?>
+      <rss version="2.0" xmlns:dc="https://purl.org/dc/elements/1.1/" xmlns:itunes="https://www.itunes.com/dtds/podcast-1.0.dtd">
+        <channel>
+          <item>
+            <title><![CDATA[Test title]]></title>
+            <link>https://www.test.com/test-article/</link>
+          </item>
+        </channel>
+      </rss>
+      `;
+
+      let data = Feeds.rss(xml);
+
+      expect(data.items[0]).to.deep.equal({
+        title : 'Test title',
+        link : 'https://www.test.com/test-article/',
+        img_url : null
+      });
+    });
+
+    it('should return nulls for title, img_url, and link when there is no values', () => {
+      let xml = `<?xml version="1.0"?>
+      <rss version="2.0" xmlns:dc="https://purl.org/dc/elements/1.1/" xmlns:itunes="https://www.itunes.com/dtds/podcast-1.0.dtd">
+        <channel>
+          <test/>
+        </channel>
+      </rss>
+      `;
+
+      let data = Feeds.rss(xml);
+      expect(data.source).to.deep.equal({
+        title : null,
+        link: null,
+        img_url : null
+      });
+
+
+      expect(data.items).to.have.length(0);
+    });
+
+    it('should return nulls for title, img_url, and link in ITEM when there is no values', () => {
+      let xml = `<?xml version="1.0"?>
+      <rss version="2.0" xmlns:dc="https://purl.org/dc/elements/1.1/" xmlns:itunes="https://www.itunes.com/dtds/podcast-1.0.dtd">
+        <channel>
+          <item/>
+        </channel>
+      </rss>
+      `;
+
+      let data = Feeds.rss(xml);
+
+      expect(data.items[0]).to.deep.equal({
+        title : null,
+        link : null,
+        img_url : null
+      });
     });
   });
 

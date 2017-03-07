@@ -5,7 +5,7 @@ class Feeds {
   /**
    * Convert an atom rss feed to the proper json structure for the REST API
    * @param {string} xml
-   * @return {object} an JSON object containing the properties of the feed.
+   * @return {object||null} an JSON object containing the properties of the feed.
    */
   static atom(xml) {
     let feed;
@@ -61,6 +61,62 @@ class Feeds {
       items : entries
     };
   }
+
+  /**
+   * Convert an atom rss feed to the proper json structure for the REST API
+   * @param {string} xml
+   * @return {object||null} an JSON object containing the properties of the feed.
+   */
+  static rss(xml) {
+    let channel;
+
+    try {
+      channel = parser.toJson(xml, {
+        object:true,
+        sanitize: true,
+        trim: true
+      }).rss.channel;
+    } catch (e) {}
+
+    // bad data - return null
+    if (!channel) {
+      return null;
+    }
+
+
+    let source = {
+      title : channel.title || null,
+      link : channel.link || null,
+      img_url : (channel.image || {}).url || null
+    };
+
+    let items = channel.item || [];
+
+    if (!Array.isArray(items)) {
+      items = [items];
+    }
+
+    items = items.map((item) => {
+      // TODO refector to separate function
+      let img_url = null;
+      let imgMatch = (item.description || '').match(/src="[\w\W]+?"/) || '';
+      if (imgMatch[0]) {
+        img_url = imgMatch[0].replace('src="', '').replace('"', '');
+      }
+
+      return {
+        title : item.title || null,
+        link: item.link || null,
+        img_url
+      }
+    });
+
+    return {
+      source,
+      items
+    };
+  }
+
 
 }
 
