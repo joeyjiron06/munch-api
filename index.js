@@ -48,9 +48,25 @@ const app = express();
 
 app.route('/v1/feed')
   .get((req, res) => {
-    res.status(400).json({
-      message : 'You must specify a feed url'
-    })
+    if (req.query.url) {
+      res.status(200)
+        .json([
+          {
+            title:'hi',
+            img_url:'hi',
+            link : 'http://www.theverge.com',
+            source : {
+              title : 'The Verge',
+              img_url:'hi',
+              link : 'http://www.theverge.com/'
+            }
+          }
+        ])
+    } else {
+      res.status(400).json({
+        message : 'You must specify a feed url'
+      })
+    }
   });
 
 
