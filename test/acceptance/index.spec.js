@@ -3,7 +3,7 @@ const server = require('../../index');
 const chaiHttp = require('chai-http');
 
 const expect = chai.expect;
-const RSS_URL = 'http://www.theverge.com/rss/index.xml';
+const THE_VERGE_RSS_URL = 'http://www.theverge.com/rss/index.xml';
 
 chai.use(chaiHttp);
 
@@ -33,9 +33,19 @@ describe('Server', () => {
         });
     });
 
-    it('should return a JSON structure when given a url', (done) => {
+    it('should return 200 status code and an empty array when an INVALID RSS feed is specified', (done) => {
       chai.request(server)
-        .get(`/v1/feed?url=${encodeURIComponent(RSS_URL)}`)
+        .get(`/v1/feed?url=${encodeURIComponent('http://hi.com')}`)
+        .end((err, res) => {
+          expect(res.status).to.equal(200);
+          expect(res.body).to.be.empty;
+          done();
+        });
+    });
+
+    it('should return an array of articles when given a url', (done) => {
+      chai.request(server)
+        .get(`/v1/feed?url=${encodeURIComponent(THE_VERGE_RSS_URL)}`)
         .end((err, res) => {
           expect(res.status).to.equal(200);
           expect(res.body).to.not.be.empty;
