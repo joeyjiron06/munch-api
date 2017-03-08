@@ -1,4 +1,5 @@
 const parser = require('xml2json');
+const http = require('./http');
 
 const PARSER_OPTIONS = {
   object:true,
@@ -8,6 +9,31 @@ const PARSER_OPTIONS = {
 
 
 class Feeds {
+
+  /**
+   * @see Feeds.rss
+   * @see Feeds.atom
+   * @param {string} url
+   * @return {Promise} returns a promise that yields an Object {source, items}
+   */
+  static fetch(url) {
+    return http.get(url)
+      .then((response) => {
+        let string = response.string();
+
+        // parse the response string
+        let type = Feeds.identify(string);
+        if (type === 'atom') {
+          return Feeds.atom(string);
+        } else if (type === 'rss') {
+          return Feeds.rss(string);
+        }
+
+        // could not parse the file to throw an error
+        response.error = new Error('parse error');
+        throw response;
+      });
+  }
 
   /**
    *
