@@ -3,6 +3,7 @@ const fs = require('fs');
 const Feeds = require('../../src/Feeds');
 const fixtureServer = require('../lib/fixture-server');
 
+const PORT = 4000;
 
 describe('Feeds', () => {
 
@@ -205,7 +206,7 @@ describe('Feeds', () => {
   describe('fetch', () => {
 
     before(() => {
-      fixtureServer.init(8080);
+      fixtureServer.init(PORT);
     });
 
     after(() => {
@@ -217,7 +218,7 @@ describe('Feeds', () => {
     });
 
     it('should return parsed feed item when passed an RSS url', (done) => {
-      Feeds.fetch('http://localhost:8080/rss.feed.xml')
+      Feeds.fetch(`http://localhost:${PORT}/rss.feed.xml`)
         .then((feed) => {
           expect(feed).to.be.an.object;
           expect(feed.source).to.deep.equal({
@@ -237,7 +238,7 @@ describe('Feeds', () => {
 
 
     it('should return parsed feed item when passed an ATOM url', (done) => {
-      Feeds.fetch('http://localhost:8080/atom.feed.xml')
+      Feeds.fetch(`http://localhost:${PORT}/atom.feed.xml`)
         .then((feed) => {
           expect(feed).to.be.an.object;
           expect(feed.source).to.deep.equal({
@@ -257,7 +258,7 @@ describe('Feeds', () => {
 
 
     it('should reject the promise with a parse error when the url is not a valid feed', (done) => {
-      Feeds.fetch('http://localhost:8080/invalid.feed.xml')
+      Feeds.fetch(`http://localhost:${PORT}/invalid.feed.xml`)
         .catch((response) => {
           expect(response.error.message).to.equal('parse error');
         })
@@ -265,7 +266,7 @@ describe('Feeds', () => {
     });
 
     it('should reject the promise with a 404 status code', (done) => {
-      Feeds.fetch('http://localhost:8080/I_DO_NOT_EXIST')
+      Feeds.fetch(`http://localhost:${PORT}/I_DO_NOT_EXIST`)
         .catch((response) => {
           expect(response.statusCode).to.equal(404);
         })
