@@ -1,4 +1,5 @@
 const express = require('express');
+const Feeds = require('./src/Feeds');
 // const bodyParser = require('body-parser');
 // const cors = require('cors');
 
@@ -49,19 +50,18 @@ const app = express();
 app.route('/v1/feed')
   .get((req, res) => {
     if (req.query.url) {
-      res.status(200)
-        .json([
-          {
-            title:'hi',
-            img_url:'hi',
-            link : 'http://www.theverge.com',
-            source : {
-              title : 'The Verge',
-              img_url:'hi',
-              link : 'http://www.theverge.com/'
-            }
-          }
-        ])
+      Feeds.fetch(req.query.url)
+        .then((feed) => {
+          res.status(200)
+            .json(feed);
+        })
+        .catch((response) => {
+          res.status(400).json({
+            url : req.query.url,
+            message : 'invalid url'
+          })
+        });
+
     } else {
       res.status(400).json({
         message : 'You must specify a feed url'

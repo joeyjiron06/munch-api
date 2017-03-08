@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 const fs = require('fs');
 const Feeds = require('../../src/Feeds');
-const express = require('express');
+const fixtureServer = require('../lib/fixture-server');
 
 
 describe('Feeds', () => {
@@ -203,16 +203,13 @@ describe('Feeds', () => {
 
 
   describe('fetch', () => {
-    let devServer;
 
     before(() => {
-      let app = express();
-      app.use(express.static('test/fixtures'));
-      devServer = app.listen(8080);
+      fixtureServer.init(8080);
     });
 
     after(() => {
-      devServer.close();
+      fixtureServer.destroy();
     });
 
     it('should return a promise', () => {
