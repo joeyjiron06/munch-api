@@ -83,7 +83,6 @@ describe('Server', () => {
         .get(`/v1/feed?url=${encodeURIComponent(fixtureUrl)}`)
         .end((err, res) => {
           let headers = res.headers;
-          console.log('res', res.headers);
           expect(headers['access-control-allow-origin']).to.equal('*');
           done();
         });
