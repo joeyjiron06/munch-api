@@ -15,6 +15,7 @@ describe('/GET feed', () => {
     mockServer.destroy();
   });
 
+  // todo expect content-type json
 
   it('should return 400 status code and error message when no url is specified', (done) => {
     chai.request(server)

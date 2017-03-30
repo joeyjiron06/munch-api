@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.16.1",
+    "body-parser": "^1.17.1",
     "cors": "^2.8.1",
     "express": "^4.14.1",
     "xml2json": "^0.11.0"
@@ -20,6 +20,7 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
-    "mocha": "^3.2.0"
+    "mocha": "^3.2.0",
+    "mockgoose": "^7.0.7"
   }
 }

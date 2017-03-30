@@ -1,11 +1,15 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const Feeds = require('./src/Feeds');
+const User = require('./src/routes/user');
 const cors = require('cors');
 
 
 const PORT = 8080;
 const app = express();
+
 app.use(cors());// add cors headers to all requests
+app.use(bodyParser.json());
 
 app.route('/v1/feed')
   .get((req, res) => {
@@ -28,6 +32,10 @@ app.route('/v1/feed')
       })
     }
   });
+
+
+app.route('/v1/user')
+  .post(User.postUser);
 
 
 console.log('listening on port', PORT);
