@@ -1,62 +1,143 @@
 const { expect } = require('chai');
-const { Mockgoose } = require('mockgoose');
 const mongoose = require('mongoose');
-
-const mockgoose = new Mockgoose(mongoose);
-
+const MockMongoose = require('../lib/mock-mongoose');
 const User = require('../../src/models/user');
 
-
+/**
+ * User model Tests
+ * These are integration tests, testing the methods on mongoose.
+ * For testing purposes we only use an in memory database and connect to it
+ *
+ */
 describe('User Model', () => {
 
+  // TODO move this to a global setup
+  let mockDB;
   before((done) => {
-    console.log('BEFORE : storage prepared!');
-    mockgoose.prepareStorage().then(() => {
-      console.log('AFTER : storage prepared!');
-
-      mongoose.Promise = global.Promise;
-      mongoose.connect('mongodb://localhost/testdb');
-      mongoose.connection.on('connected', (err) => {
-        if (err) { console.error('ERROR connecting to db', err); }
-        done(err);
-      });
-
-      mongoose.connection.on('error', (err) => {
-        if (err) { console.error('ERROR connecting to db', err); }
-        done(err);
-      });
-
-    })
-      .catch((error) => {
-        console.log('ERROR preparing storage', error);
-        done(error);
-      });
+    mockDB = new MockMongoose(mongoose);
+    mockDB.initialize().then(done);
   });
 
+  beforeEach((done) => {
+    // remove all users before each test
+    User.remove({}, done);
+  });
+
+  // todo : stop
+  // after(() => {
+    // mockDB.cleanup();
+  // });
 
   describe('save', () => {
+    let user;
+
     it('should return a promise',  () => {
-      let promise = new User({username:'what', password:'1234'}).save();
-      expect(promise).to.be.instanceOf(global.Promise);
+      user = new User({email:'what@what.com', password:'1234'});
+      expect(user.save()).to.be.instanceOf(Promise);
     });
 
+    it('should return an error if no email supplied', (done) => {
+      user = new User({});
+      user.save().then(() => {
+         throw new Error('saving a user with no password must reject the promise');
+       })
+       .catch((err) => {
+          expect(err.errors.email).to.be.an.error;
+          expect(err.errors.email.message).to.be.definded;
+       })
+       .then(done)
+       .catch(done);
+    });
 
-    //it('should return an error of no email', () => {
-    //  new User({password:'password'})
-    //    .save()
-    //    .then(() => {
-    //      throw new Error('saving a user with no password must reject the promise');
-    //    })
-    //    .catch((err) => {
-    //      expect(err).to.be.defined;
-    //    });
-    //});
-    // - should return an error if no email
-    // - should return an error if email is not an email format
-    // - should return an error if no password
-    // - should return an error if password is less than 3 chars
-    // - should return an error if user exists
-    // - should return the saved user if success
+    it('should return an error if email is not an email format', (done) => {
+      user = new User({email:'whatIsThisItsNotAnEmail', password:'password'});
+      user.save().then(() => {
+        throw new Error('saving a user with invalid email must reject the promise');
+      })
+      .catch((err) => {
+        expect(err.errors.email).to.be.an.error;
+        expect(err.errors.email.message).to.be.definded;
+      })
+      .then(done)
+      .catch(done);
+    });
+
+    it('should return a error if no password is given', (done) => {
+      user = new User({email:'joeyjiron06@gmail.com'});
+      user.save().then(() => {
+        throw new Error('saving a user with NO password must reject the promise');
+      })
+      .catch((err) => {
+        expect(err.errors.password).to.be.an.error;
+        expect(err.errors.password.message).to.be.defined;
+      })
+      .then(done)
+      .catch(done);
+    });
+
+    it('should return an invalid password error if its less than 3 chars', (done) => {
+      user = new User({email:'joeyjiron06@gmail.com', password:'aa'});
+      user.save().then(() => {
+        throw new Error('saving a user with invalid password must reject the promise');
+      })
+      .catch((err) => {
+        expect(err.errors.password).to.be.an.error;
+        expect(err.errors.password.message).to.not.be.empty;
+      })
+      .then(done)
+      .catch(done);
+    });
+
+    it('should return an error if the user already exists', (done) => {
+      new User({email:'joeyjiron06@gmail.com', password:'password'}).save()
+        .then((user) => {
+          return new User({email:'joeyjiron06@gmail.com', password:'someotherpassword'}).save();
+        })
+        .then((user) => {
+          throw new Error('promise should be rejected when trying to add a user for a second time');
+        })
+        .catch((err) => {
+          expect(err.code).to.equal(11000);
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('should save a user with a valid email and password', (done) => {
+      new User({email:'joeyjiron06@gmail.com', password:'password'}).save()
+        .then((user) => {
+          expect(user).to.be.an.object;
+          expect(user.email).to.equal('joeyjiron06@gmail.com');
+
+          //TODO call find and return that user
+        })
+        .then(done)
+        .catch(done);
+    });
+
+    it('should be able to save multiple users', (done) => {
+      new User({email:'barbarastreisand@gmail.com', password:'password'}).save()
+      .then((user) => {
+        return new User({email:'bobsagat@gmail.com', password:'mypass'}).save();
+      })
+      .then((user) => {
+        return User.find();
+      })
+      .then((users) => {
+        expect(users).to.have.length(2);
+      })
+      .then(done)
+      .catch(done);
+    });
+
+    it('should not save clear text password', (done) => {
+      new User({email:'joeyjiron06@gmail.com', password:'secret'}).save()
+        .then((user) => {
+          expect(user.password).to.not.equal('secret');
+        })
+        .then(done)
+        .catch(done);
+    });
   });
 
 

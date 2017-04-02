@@ -10,14 +10,7 @@ chai.use(chaiHttp);
 
 describe('User', () => {
   describe('POST /user', () => {
-    // - success
-    // + no username
-    // + no password
-    // - username already taken
-    // ? generic db error
     // todo expect content-type json, ex expect(res).to.have.header('content-type', 'text/plain');
-
-
 
     function postUser(user, callback) {
       chai.request(server)
@@ -27,6 +20,7 @@ describe('User', () => {
     }
 
 
+    // + no email
     it('should return 400 when no email is supplied', (done) => {
       postUser({'password': 'hello'}, (err, res) => {
         expect(res).to.have.status(400);
@@ -37,6 +31,7 @@ describe('User', () => {
       });
     });
 
+    // + no password
     it('should return 400 when no password is supplied', (done) => {
       postUser({email: 'joey'}, (err, res) => {
         expect(res).to.have.status(400);
@@ -58,6 +53,7 @@ describe('User', () => {
 
     });
 
+    // - email already taken
     it('should return 409 when email is already taken', (done) => {
       let user = {username:'joey-test', password:'testpwd'};
       postUser(user, (err, res) => {
@@ -77,21 +73,9 @@ describe('User', () => {
       });
     });
 
+    // - email not in email format
+    // - password too short
+    // - success
 
-
-    //it('should be able to create a user', (done) => {
-    //  chai.request(server)
-    //    .post('/v1/user')
-    //    .field('username', 'joey')
-    //    .field('password', 'hello')
-    //    .end((err, res) => {
-    //      expect(res.status).to.equal(200);
-    //      expect(res.body).to.deep.equal({
-    //        username : 'joey',
-    //        password : 'hello'
-    //      });
-    //      done();
-    //    });
-    //});
   });
 });
