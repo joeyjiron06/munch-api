@@ -12,21 +12,14 @@ const User = require('../../src/models/user');
 describe('User Model', () => {
 
   // TODO move this to a global setup
-  let mockDB;
   before((done) => {
-    mockDB = new MockMongoose(mongoose);
-    mockDB.initialize().then(done);
+    MockMongoose.initialize().then(() => done());
   });
 
   beforeEach((done) => {
     // remove all users before each test
-    User.remove({}, done);
+    User.remove({}).then(() => done());
   });
-
-  // todo : stop
-  // after(() => {
-    // mockDB.cleanup();
-  // });
 
   describe('save', () => {
     let user;
@@ -109,7 +102,11 @@ describe('User Model', () => {
           expect(user).to.be.an.object;
           expect(user.email).to.equal('joeyjiron06@gmail.com');
 
-          //TODO call find and return that user
+          return User.find({});
+        })
+        .then((foundUsers) => {
+          expect(foundUsers).to.have.length(1);
+          expect(foundUsers[0].email).to.equal('joeyjiron06@gmail.com');
         })
         .then(done)
         .catch(done);

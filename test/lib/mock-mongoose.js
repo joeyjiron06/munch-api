@@ -1,24 +1,17 @@
 const path = require('path');
-const os = require('os');
 const fs = require('fs-extra');
 const {MongodHelper} = require('mongodb-prebuilt');
+const mongoose = require('mongoose');
 
 
 class MockMongoose {
-  /**
-   * @param {mongoose} mongoose - a mongoose client.
-   */
-  constructor(mongoose) {
-    this.mongoose = mongoose;
-  }
-
   /**
    * Start the in memory server and connect to it.
    * @public
    * @return {Promise}
    */
-  initialize() {
-    this.mongoose.Promise = Promise;
+  static initialize() {
+    mongoose.Promise = Promise;
     let tmpDir = this.prepareTempStorage();
 
     let port = 27017;
@@ -31,7 +24,7 @@ class MockMongoose {
    * @private
    * @return {string} the path to the temp directory
    */
-  prepareTempStorage() {
+  static prepareTempStorage() {
     let pathname = path.join(process.cwd(), 'tmp');
 
     // clear folder if there was anything there before
@@ -50,7 +43,7 @@ class MockMongoose {
    * @param {string} tmpDir - the temp directory for db even though it's in memory, it still needs that
    * @return {Promise}
    */
-  startMongo(port, tmpDir) {
+  static startMongo(port, tmpDir) {
     let mongod = new MongodHelper([
       '--port',port,
       '--storageEngine', 'ephemeralForTest',
@@ -65,10 +58,10 @@ class MockMongoose {
    * @param {string} url - the url to mongodb database
    * @return {Promise}
    */
-  connect(url) {
+  static connect(url) {
     return new Promise((resolve, reject) => {
-      this.mongoose.connect(url);
-      this.mongoose.connection.on('connected', (err) => {
+      mongoose.connect(url);
+      mongoose.connection.on('connected', (err) => {
         if (err) { reject(err);}
         else { resolve(); }
       });
