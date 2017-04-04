@@ -37,9 +37,8 @@ describe('User Model', () => {
        .catch((err) => {
           expect(err.errors.email).to.be.an.error;
           expect(err.errors.email.message).to.be.definded;
-       })
-       .then(done)
-       .catch(done);
+          done();
+       });
     });
 
     it('should return an error if email is not an email format', (done) => {
@@ -50,9 +49,8 @@ describe('User Model', () => {
       .catch((err) => {
         expect(err.errors.email).to.be.an.error;
         expect(err.errors.email.message).to.be.definded;
-      })
-      .then(done)
-      .catch(done);
+        done();
+      });
     });
 
     it('should return a error if no password is given', (done) => {
@@ -63,9 +61,8 @@ describe('User Model', () => {
       .catch((err) => {
         expect(err.errors.password).to.be.an.error;
         expect(err.errors.password.message).to.be.defined;
-      })
-      .then(done)
-      .catch(done);
+        done();
+      });
     });
 
     it('should return an invalid password error if its less than 3 chars', (done) => {
@@ -76,9 +73,8 @@ describe('User Model', () => {
       .catch((err) => {
         expect(err.errors.password).to.be.an.error;
         expect(err.errors.password.message).to.not.be.empty;
-      })
-      .then(done)
-      .catch(done);
+        done();
+      });
     });
 
     it('should return an error if the user already exists', (done) => {
@@ -91,9 +87,8 @@ describe('User Model', () => {
         })
         .catch((err) => {
           expect(err.code).to.equal(11000);
-        })
-        .then(done)
-        .catch(done);
+          done();
+        });
     });
 
     it('should save a user with a valid email and password', (done) => {
@@ -107,9 +102,8 @@ describe('User Model', () => {
         .then((foundUsers) => {
           expect(foundUsers).to.have.length(1);
           expect(foundUsers[0].email).to.equal('joeyjiron06@gmail.com');
-        })
-        .then(done)
-        .catch(done);
+          done();
+        });
     });
 
     it('should be able to save multiple users', (done) => {
@@ -122,18 +116,16 @@ describe('User Model', () => {
       })
       .then((users) => {
         expect(users).to.have.length(2);
-      })
-      .then(done)
-      .catch(done);
+        done();
+      });
     });
 
     it('should not save clear text password', (done) => {
       new User({email:'joeyjiron06@gmail.com', password:'secret'}).save()
         .then((user) => {
           expect(user.password).to.not.equal('secret');
-        })
-        .then(done)
-        .catch(done);
+          done();
+        });
     });
   });
 
