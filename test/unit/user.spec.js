@@ -17,15 +17,14 @@ describe('User Model', () => {
   });
 
   beforeEach((done) => {
-    // remove all users before each test
-    User.remove({}).then(() => done());
+    MockMongoose.clear().then(() => done());
   });
 
   describe('save', () => {
     let user;
 
     it('should return a promise',  () => {
-      user = new User({email:'what@what.com', password:'1234'});
+      user = new User({email:'what@what.com', password:'password'});
       expect(user.save()).to.be.instanceOf(Promise);
     });
 
@@ -65,8 +64,8 @@ describe('User Model', () => {
       });
     });
 
-    it('should return an invalid password error if its less than 3 chars', (done) => {
-      user = new User({email:'joeyjiron06@gmail.com', password:'aa'});
+    it('should return an invalid password error if its less than 8 chars', (done) => {
+      user = new User({email:'joeyjiron06@gmail.com', password:'1234567'});
       user.save().then(() => {
         throw new Error('saving a user with invalid password must reject the promise');
       })
@@ -109,10 +108,10 @@ describe('User Model', () => {
     it('should be able to save multiple users', (done) => {
       new User({email:'barbarastreisand@gmail.com', password:'password'}).save()
       .then((user) => {
-        return new User({email:'bobsagat@gmail.com', password:'mypass'}).save();
+        return new User({email:'bobsagat@gmail.com', password:'password'}).save();
       })
       .then((user) => {
-        return User.find();
+        return User.find({});
       })
       .then((users) => {
         expect(users).to.have.length(2);
@@ -121,9 +120,9 @@ describe('User Model', () => {
     });
 
     it('should not save clear text password', (done) => {
-      new User({email:'joeyjiron06@gmail.com', password:'secret'}).save()
+      new User({email:'joeyjiron06@gmail.com', password:'secret1234'}).save()
         .then((user) => {
-          expect(user.password).to.not.equal('secret');
+          expect(user.password).to.not.equal('secret1234');
           done();
         });
     });
