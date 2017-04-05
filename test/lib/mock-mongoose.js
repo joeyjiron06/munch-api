@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const {MongodHelper} = require('mongodb-prebuilt');
 const mongoose = require('mongoose');
 
+const PORT = 27017;
 
 /**
  * @private
@@ -21,36 +22,32 @@ function prepareTempStorage() {
 }
 
 /**
- * Starts a mongodb sever at the given port
- * @private
- * @param {number} port - the port to start the db server
- * @param {string} tmpDir - the temp directory for db even though it's in memory, it still needs that
- * @return {Promise}
- */
-function startMongo(port, tmpDir) {
-  let mongod = new MongodHelper([
-    '--port',port,
-    '--storageEngine', 'ephemeralForTest',
-    '--dbpath', tmpDir,
-  ]);
-  return mongod.run();
-}
-
-/**
  * Connect mongoose to the given url
  * @private
  * @param {string} url - the url to mongodb database
  * @return {Promise}
  */
-function connect(url) {
+exports.connect = function() {
   return new Promise((resolve, reject) => {
-    mongoose.connect(url);
+    mongoose.connect(`mongodb://localhost:${PORT}`);
     mongoose.connection.on('connected', (err) => {
       if (err) { reject(err);}
       else { resolve(); }
     });
   });
-}
+};
+
+/**
+ * Disconnect from the mongodb
+ * @return {Promise}
+ */
+exports.disconnect = function() {
+  return new Promise((resolve) => {
+    mongoose.disconnect(() => {
+      resolve();
+    });
+  });
+};
 
 
 /**
@@ -61,11 +58,13 @@ function connect(url) {
 exports.initialize = function() {
   mongoose.Promise = Promise;
   let tmpDir = prepareTempStorage();
+  let mongod = new MongodHelper([
+    '--port',PORT,
+    '--storageEngine', 'ephemeralForTest',
+    '--dbpath', tmpDir,
+  ]);
 
-  let port = 27017;
-  return startMongo(port, tmpDir).then(() => {
-    return connect(`mongodb://localhost:${port}`);
-  });
+  return mongod.run();
 };
 
 /**

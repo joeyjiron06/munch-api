@@ -11,9 +11,12 @@ const User = require('../../src/models/user');
  */
 describe('User Model', () => {
 
-  // TODO move this to a global setup
   before((done) => {
-    MockMongoose.initialize().then(() => done());
+    MockMongoose.connect().then(() => done());
+  });
+
+  after((done) => {
+    MockMongoose.disconnect().then(() => done());
   });
 
   beforeEach((done) => {

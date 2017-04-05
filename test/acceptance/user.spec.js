@@ -10,7 +10,11 @@ chai.use(chaiHttp);
 
 describe('User', () => {
   before((done) => {
-    MockMongoose.initialize().then(() => done());
+    MockMongoose.connect().then(() => done());
+  });
+
+  after((done) => {
+    MockMongoose.disconnect().then(() => done());
   });
 
   beforeEach((done) => {

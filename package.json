@@ -25,6 +25,7 @@
     "chai-http": "^3.0.0",
     "fs-extra": "^2.1.2",
     "mocha": "^3.2.0",
+    "mocha-prepare": "0.0.1",
     "mockgoose": "^7.0.7"
   }
 }
