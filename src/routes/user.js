@@ -6,15 +6,13 @@ const User = require('../models/user');
  * @param {Request} req
  * @param {Response} res
  */
-exports.post = function(req, res) {
+exports.postUser = function(req, res) {
   let { email, password } = req.body;
 
   let user = new User({email, password});
 
   user.save()
     .then((user) => {
-      console.log('got here post save');
-
       res.status(200).json({
         id : user._id,
         email
@@ -35,4 +33,46 @@ exports.post = function(req, res) {
         res.status(400).json({errors});
       }
     });
+};
+
+/**
+ * DELETE /user
+ * Deletes a user
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.deleteUser = function(req, res) {
+  let { id } = req.body;
+
+  if (!id) {
+    res.status(400).json({
+      errors : {id: {message:'An id is required. Please send a json like follows {"id":"myUserId"}'}}
+    });
+    return;
+  }
+
+  User.remove({_id:id})
+    .then(() => {
+      res.status(200).json({});
+    }).catch(() => {
+      res.status(400).json({
+        errors : {id: {message:'A valid id is required. Please send a json like follows {"id":"myUserId"}'}}
+      });
+    });
+};
+
+/**
+ * GET /user
+ * Gets a user
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.getUser = function(req, res) {
+  // let { email, password } = req.body;
+  // let user = new User({email, password});
+  res.status(400).json({
+    errors : {
+      id : {message : 'User not found'}
+    }
+  });
 };

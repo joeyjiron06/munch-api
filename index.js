@@ -39,7 +39,9 @@ app.route('/v1/feed')
 
 
 app.route('/v1/user')
-  .post(User.post);
+  .postUser(User.postUser)
+  .get(User.getUser)
+  .delete(User.deleteUser);
 
 
 console.log('listening on port', PORT);
