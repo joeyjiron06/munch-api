@@ -39,7 +39,7 @@ app.route('/v1/feed')
 
 
 app.route('/v1/user')
-  .postUser(User.postUser)
+  .post(User.postUser)
   .get(User.getUser)
   .delete(User.deleteUser);
 

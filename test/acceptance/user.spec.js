@@ -23,7 +23,7 @@ describe('User', () => {
   function postUser(user) {
     return new Promise((resolve, reject) => {
       chai.request(server)
-        .postUser('/v1/user')
+        .post('/v1/user')
         .send(user)
         .end((err, res) => {
           if (err) {
@@ -175,10 +175,41 @@ describe('User', () => {
     });
   });
 
-  describeSKIP('GET /user/:id', () => {
-    // - no id should return a 400 with a user not found message
-    // - invalid id should return a 400 with user not found message
-    // - 200 success case
+  describe('GET /user', () => {
+
+    it('should return 400 when not id is passed', (done) => {
+      getUser(null).catch((res) => {
+        expect(res).to.have.status(400);
+        expect(res.body.errors.id.message).to.not.be.empty;
+        done();
+      });
+    });
+
+    it('should return 400 when no user found with id', (done) => {
+      getUser('12fakeid').catch((res) => {
+        expect(res).to.have.status(400);
+        expect(res.body.errors.id.message).to.not.be.empty;
+        done();
+      });
+    });
+
+    it('should return 200 and user info when valid user id is given', (done) => {
+      let userId;
+      postUser({email:'jo@gmail.com', password:'password'})
+        .then((res) => {
+          userId = res.body.id;
+          return getUser(userId);
+        })
+        .then((res) => {
+          let user = res.body;
+          expect(res).to.have.status(200);
+          expect(user).to.deep.equal({
+            id : userId,
+            email : 'jo@gmail.com'
+          });
+          done();
+        });
+    });
   });
 
   describeSKIP('UPDATE /user/password', () => {
