@@ -43,6 +43,9 @@ app.route('/v1/user')
   .get(User.getUser)
   .delete(User.deleteUser);
 
+app.route('/v1/user/update/password')
+  .post(User.updatePassword);
+
 
 console.log('listening on port', PORT);
 

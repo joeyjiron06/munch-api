@@ -131,5 +131,8 @@ describe('User Model', () => {
     });
   });
 
+  //TODO compare password
+
+
 
 });

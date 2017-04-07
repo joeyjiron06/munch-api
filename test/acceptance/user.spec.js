@@ -65,6 +65,25 @@ describe('User', () => {
     });
   }
 
+  function updatePassword(oldPassword, newPassword, id) {
+    return new Promise((resolve, reject) => {
+      chai.request(server)
+        .post('/v1/user/update/password')
+        .send({
+          id: id,
+          old_password: oldPassword,
+          new_password: newPassword
+        })
+        .end((err, res) => {
+          if (err) {
+            reject(res);
+          } else {
+            resolve(res);
+          }
+        });
+    });
+  }
+
   describe('POST /user', () => {
     // todo expect content-type json, ex expect(res).to.have.header('content-type', 'text/plain');
 
@@ -212,13 +231,69 @@ describe('User', () => {
     });
   });
 
-  describeSKIP('UPDATE /user/password', () => {
-    // - invalid previous password
-    // - invalid new password
-    // - success case
+  describe('POST /user/update/password', () => {
+    let user = {email:'joeyjiron06@gmail.com', password:'password'};
+
+    it('should return a 400 and error message when an invalid previous password is sent', () => {
+      return postUser(user)
+        .then((res) => {
+          return updatePassword('thewrongpassword', 'someNewPassword', res.body.id);
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.old_password.message).to.not.be.empty;
+          expect(res.body.errors.new_password).to.be.undefined;
+        });
+    });
+
+    it('should return a 400 and error message when in invalid new password is sent', () => {
+      return postUser(user)
+        .then((res) => {
+          return updatePassword('password', '2short', res.body.id);
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.new_password.message).to.not.be.empty;
+          expect(res.body.errors.old_password).to.be.undefined;
+        });
+    });
+
+    //invalid user id
+    it('should return a 400 with error message when given a bad user id', () => {
+      return updatePassword('password', 'newPassword', 'bogusIdThatDoesntExist')
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.id.message).to.not.be.empty;
+          expect(res.body.errors.new_password).to.be.undefined;
+          expect(res.body.errors.old_password).to.be.undefined;
+        });
+    });
+
+
+    it('should return a 200 and user when password is updated properly', () => {
+      let userId;
+      return postUser(user)
+        .then((res) => {
+          userId = res.body.id;
+          return updatePassword('password', 'newPassword', res.body.id);
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.email).to.equal('joeyjiron06@gmail.com');
+          expect(res.body.id).to.equal(userId);
+          //TODO get token with new password should return success as well
+        });
+    });
+
   });
 
   describeSKIP('GET /user/email/:email', () => {
+    // - invalid email
+    // - email does NOT exist
+    // - email does exist
+  });
+
+  describeSKIP('GET /user/token', () => {
     // - invalid email
     // - email does NOT exist
     // - email does exist

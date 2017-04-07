@@ -85,3 +85,49 @@ exports.getUser = function(req, res) {
       });
     });
 };
+
+/**
+ * POST /user/update/password
+ * Gets a user
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.updatePassword = function(req, res) {
+
+  let { old_password, new_password, id } = req.body;
+
+  User.findOne({_id:id})
+    .then((user) => {
+      return user.comparePassword(old_password).then((isPasswordMatch) => { return {user, isPasswordMatch}; });
+    })
+    .then((res) => {
+      let {isPasswordMatch, user} = res;
+      if (isPasswordMatch) {
+        user.password = new_password;
+        return user.save();
+      } else {
+        return Promise.reject({kind:'WRONG_PASS'});
+      }
+    })
+    .then((user) => {
+      res.status(200).json({
+        id: user._id,
+        email: user.email
+      });
+    })
+    .catch((err) => {
+      if (err.kind === 'WRONG_PASS') {
+        res.status(400).json({
+          errors : {old_password : {message : 'Your new password is invalid'}}
+        });
+      } else if (err.kind === 'ObjectId') {
+        res.status(400).json({
+          errors : {id: {message : 'User not found'}}
+        });
+      } else {
+        res.status(400).json({
+          errors : {new_password : {message : err.errors.password.message}}
+        });
+      }
+    });
+};
