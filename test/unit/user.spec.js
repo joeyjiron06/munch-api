@@ -12,16 +12,16 @@ const User = require('../../src/models/user');
 describe('User Model', () => {
   let user;
 
-  before((done) => {
-    MockMongoose.connect().then(() => done());
+  before(() => {
+    return MockMongoose.connect();
   });
 
-  after((done) => {
-    MockMongoose.disconnect().then(() => done());
+  after(() => {
+    return MockMongoose.disconnect();
   });
 
-  beforeEach((done) => {
-    MockMongoose.clear().then(() => done());
+  beforeEach(() => {
+    return MockMongoose.clear();
   });
 
   describe('save', () => {
@@ -31,56 +31,40 @@ describe('User Model', () => {
       expect(user.save()).to.be.instanceOf(Promise);
     });
 
-    it('should return an error if no email supplied', (done) => {
+    it('should return an error if no email supplied', () => {
       user = new User({});
-      user.save().then(() => {
-         throw new Error('saving a user with no password must reject the promise');
-       })
-       .catch((err) => {
+      return user.save().catch((err) => {
           expect(err.errors.email).to.be.an.error;
           expect(err.errors.email.message).to.be.definded;
-          done();
        });
     });
 
-    it('should return an error if email is not an email format', (done) => {
+    it('should return an error if email is not an email format', () => {
       user = new User({email:'whatIsThisItsNotAnEmail', password:'password'});
-      user.save().then(() => {
-        throw new Error('saving a user with invalid email must reject the promise');
-      })
-      .catch((err) => {
+      return user.save().catch((err) => {
         expect(err.errors.email).to.be.an.error;
         expect(err.errors.email.message).to.be.definded;
-        done();
       });
     });
 
-    it('should return a error if no password is given', (done) => {
+    it('should return a error if no password is given', () => {
       user = new User({email:'joeyjiron06@gmail.com'});
-      user.save().then(() => {
-        throw new Error('saving a user with NO password must reject the promise');
-      })
-      .catch((err) => {
+      return user.save().catch((err) => {
         expect(err.errors.password).to.be.an.error;
         expect(err.errors.password.message).to.be.defined;
-        done();
       });
     });
 
-    it('should return an invalid password error if its less than 8 chars', (done) => {
+    it('should return an invalid password error if its less than 8 chars', () => {
       user = new User({email:'joeyjiron06@gmail.com', password:'1234567'});
-      user.save().then(() => {
-        throw new Error('saving a user with invalid password must reject the promise');
-      })
-      .catch((err) => {
+      return user.save().catch((err) => {
         expect(err.errors.password).to.be.an.error;
         expect(err.errors.password.message).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return an error if the user already exists', (done) => {
-      new User({email:'joeyjiron06@gmail.com', password:'password'}).save()
+    it('should return an error if the user already exists', () => {
+      return new User({email:'joeyjiron06@gmail.com', password:'password'}).save()
         .then((user) => {
           return new User({email:'joeyjiron06@gmail.com', password:'someotherpassword'}).save();
         })
@@ -89,12 +73,11 @@ describe('User Model', () => {
         })
         .catch((err) => {
           expect(err.code).to.equal(11000);
-          done();
         });
     });
 
-    it('should save a user with a valid email and password', (done) => {
-      new User({email:'joeyjiron06@gmail.com', password:'password'}).save()
+    it('should save a user with a valid email and password', () => {
+      return new User({email:'joeyjiron06@gmail.com', password:'password'}).save()
         .then((user) => {
           expect(user).to.be.an.object;
           expect(user.email).to.equal('joeyjiron06@gmail.com');
@@ -104,29 +87,26 @@ describe('User Model', () => {
         .then((foundUsers) => {
           expect(foundUsers).to.have.length(1);
           expect(foundUsers[0].email).to.equal('joeyjiron06@gmail.com');
-          done();
         });
     });
 
-    it('should be able to save multiple users', (done) => {
-      new User({email:'barbarastreisand@gmail.com', password:'password'}).save()
-      .then((user) => {
-        return new User({email:'bobsagat@gmail.com', password:'password'}).save();
-      })
-      .then((user) => {
-        return User.find({});
-      })
-      .then((users) => {
-        expect(users).to.have.length(2);
-        done();
-      });
+    it('should be able to save multiple users', () => {
+      return new User({email:'barbarastreisand@gmail.com', password:'password'}).save()
+        .then((user) => {
+          return new User({email:'bobsagat@gmail.com', password:'password'}).save();
+        })
+        .then((user) => {
+          return User.find({});
+        })
+        .then((users) => {
+          expect(users).to.have.length(2);
+        });
     });
 
-    it('should not save clear text password', (done) => {
-      new User({email:'joeyjiron06@gmail.com', password:'secret1234'}).save()
+    it('should not save clear text password', () => {
+      return new User({email:'joeyjiron06@gmail.com', password:'secret1234'}).save()
         .then((user) => {
           expect(user.password).to.not.equal('secret1234');
-          done();
         });
     });
   });
@@ -151,7 +131,4 @@ describe('User Model', () => {
         });
     });
   });
-
-
-
 });

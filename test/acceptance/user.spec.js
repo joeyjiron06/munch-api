@@ -7,17 +7,17 @@ const { expect } = chai;
 
 const describeSKIP = function(name) { console.log('skipping test', name); };
 
-describe('User', () => {
-  before((done) => {
-    MockMongoose.connect().then(() => done());
+describe('User API', () => {
+  before(() => {
+    return MockMongoose.connect();
   });
 
-  after((done) => {
-    MockMongoose.disconnect().then(() => done());
+  after(() => {
+    return MockMongoose.disconnect();
   });
 
-  beforeEach((done) => {
-    MockMongoose.clear().then(() => done());
+  beforeEach(() => {
+    return MockMongoose.clear();
   });
 
   function postUser(user) {
@@ -87,97 +87,88 @@ describe('User', () => {
   describe('POST /user', () => {
     // todo expect content-type json, ex expect(res).to.have.header('content-type', 'text/plain');
 
-    it('should return 400 when no email is supplied', (done) => {
-      postUser({'password': 'hello1234'}).catch((res) => {
+    it('should return 400 when no email is supplied', () => {
+      return postUser({'password': 'hello1234'}).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body).to.be.an.object;
         expect(res.body.errors).to.be.an.object;
         expect(res.body.errors.email).to.be.an.object;
         expect(res.body.errors.email.message).to.not.be.empty;
         expect(res.body.errors.password).to.be.undefined;
-        done();
       });
     });
 
-    it('should return 400 when no password is supplied', (done) => {
-      postUser({email: 'joey'}).catch((res) => {
+    it('should return 400 when no password is supplied', () => {
+      return postUser({email: 'joey'}).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email.message).to.not.be.empty;
         expect(res.body.errors.password.message).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return 400 when no body is supplied', (done) => {
-      postUser(null).catch((res) => {
+    it('should return 400 when no body is supplied', () => {
+      return postUser(null).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email.message).to.not.be.empty;
         expect(res.body.errors.password.message).to.not.be.empty;
-        done();
       });
 
     });
 
-    it('should return 409 and email error message when email is already taken', (done) => {
+    it('should return 409 and email error message when email is already taken', () => {
       let user = {email:'joeyjiron06@gmail.com', password:'testpwd1234'};
-      postUser(user).then((res) => postUser(user)).catch((res) => {
+      return postUser(user).then((res) => postUser(user)).catch((res) => {
         expect(res).to.have.status(409);
         expect(res.body.errors.email).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return a 400 and an email error message when email is not in the right formate', (done) => {
+    it('should return a 400 and an email error message when email is not in the right formate', () => {
       let user = {email:'notTheRightFormat', password:'23asdfasdf'};
-      postUser(user).catch((res) => {
+      return postUser(user).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return a 400 and password error when password is too short', (done) => {
+    it('should return a 400 and password error when password is too short', () => {
       let user = {email:'joeyjiron06@gmail.com', password:'122'};
-      postUser(user).catch((res) => {
+      return postUser(user).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email).to.be.undefined;
         expect(res.body.errors.password).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return a 200 and user id when given good data', (done) => {
+    it('should return a 200 and user id when given good data', () => {
       let user = {email:'joeyjiron06@gmail.com', password:'12345678'};
-      postUser(user).then((res) => {
+      return postUser(user).then((res) => {
         expect(res).to.have.status(200);
         expect(res.body.id).to.not.be.empty;
         expect(res.body.email).to.equal('joeyjiron06@gmail.com');
-        done();
       });
     });
   });
 
   describe('DELETE /user', () => {
 
-    it('should return a 400 when no user id is passed', (done) => {
-      deleteUser(null).catch((res) => {
+    it('should return a 400 when no user id is passed', () => {
+      return deleteUser(null).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return a 400 if user is not found', (done) => {
-      deleteUser('1').catch((res) => {
+    it('should return a 400 if user is not found', () => {
+      return deleteUser('1').catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id).to.not.be.empty;
-        done();
       });
     });
 
-    it('should delete a saved user', (done) => {
+    it('should delete a saved user', () => {
       let userId;
-      postUser({email:'joeyj@gmail.com', password:'password'})
+      return postUser({email:'joeyj@gmail.com', password:'password'})
         .then((res) => {
           userId = res.body.id;
           return deleteUser(userId);
@@ -189,32 +180,29 @@ describe('User', () => {
         .catch((res) => {
           expect(res).to.have.status(400);
           expect(res.body.errors.id.message).to.not.be.empty;
-          done();
         });
     });
   });
 
   describe('GET /user', () => {
 
-    it('should return 400 when not id is passed', (done) => {
-      getUser(null).catch((res) => {
+    it('should return 400 when not id is passed', () => {
+      return getUser(null).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id.message).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return 400 when no user found with id', (done) => {
-      getUser('12fakeid').catch((res) => {
+    it('should return 400 when no user found with id', () => {
+      return getUser('12fakeid').catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id.message).to.not.be.empty;
-        done();
       });
     });
 
-    it('should return 200 and user info when valid user id is given', (done) => {
+    it('should return 200 and user info when valid user id is given', () => {
       let userId;
-      postUser({email:'jo@gmail.com', password:'password'})
+      return postUser({email:'jo@gmail.com', password:'password'})
         .then((res) => {
           userId = res.body.id;
           return getUser(userId);
@@ -226,7 +214,6 @@ describe('User', () => {
             id : userId,
             email : 'jo@gmail.com'
           });
-          done();
         });
     });
   });
