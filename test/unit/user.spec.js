@@ -10,6 +10,7 @@ const User = require('../../src/models/user');
  *
  */
 describe('User Model', () => {
+  let user;
 
   before((done) => {
     MockMongoose.connect().then(() => done());
@@ -24,7 +25,6 @@ describe('User Model', () => {
   });
 
   describe('save', () => {
-    let user;
 
     it('should return a promise',  () => {
       user = new User({email:'what@what.com', password:'password'});
@@ -131,7 +131,26 @@ describe('User Model', () => {
     });
   });
 
-  //TODO compare password
+
+  describe('comparePassword', () => {
+    it('should return true if password is correct', () => {
+      user = new User({email:'what@what.com', password:'password'});
+      return user.save()
+        .then(() => user.comparePassword('password'))
+        .then((isPasswordMatch) => {
+          expect(isPasswordMatch, 'good password should return true').to.be.true;
+        });
+    });
+
+    it('should return false if password is incorrect', () => {
+      user = new User({email:'what@what.com', password:'password'});
+      return user.save()
+        .then(() => user.comparePassword('notCorrectPass'))
+        .then((isPasswordMatch) => {
+          expect(isPasswordMatch, 'bad password should return false').to.be.false;
+        });
+    });
+  });
 
 
 
