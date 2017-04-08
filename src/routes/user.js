@@ -131,3 +131,26 @@ exports.updatePassword = function(req, res) {
       }
     });
 };
+
+/**
+ * POST /user/verify-email
+ * Gets a user
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.verifyEmail = function(req, res) {
+  let { email } = req.body;
+
+  User.findOne({email})
+    .then((user) => {
+      res.status(200).json({
+        isEmailAvailable: !user
+      });
+    })
+    .catch((err) => {
+      console.log('SHOULD NOT GET HERE in verifyEmail');
+      res.status(200).json({
+        isEmailAvailable:true
+      });
+    });
+};

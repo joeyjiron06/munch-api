@@ -27,6 +27,9 @@ app.route('/v1/user')
 app.route('/v1/user/update/password')
   .post(User.updatePassword);
 
+app.route('/v1/user/verify-email')
+  .post(User.verifyEmail);
+
 
 console.log('listening on port', PORT);
 

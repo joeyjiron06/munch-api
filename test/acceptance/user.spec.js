@@ -84,6 +84,21 @@ describe('User API', () => {
     });
   }
 
+  function verifyEmail(email) {
+    return new Promise((resolve, reject) => {
+      chai.request(server)
+        .post('/v1/user/verify-email')
+        .send({email})
+        .end((err, res) => {
+          if (err) {
+            reject(res);
+          } else {
+            resolve(res);
+          }
+        });
+    });
+  }
+
   describe('POST /user', () => {
     // todo expect content-type json, ex expect(res).to.have.header('content-type', 'text/plain');
 
@@ -274,10 +289,23 @@ describe('User API', () => {
 
   });
 
-  describeSKIP('GET /user/email/:email', () => {
-    // - invalid email
-    // - email does NOT exist
-    // - email does exist
+  describe('GET /user/verify-email', () => {
+    it('should return true if email is available to use', () => {
+      return verifyEmail('joeyjiron06@gmail.com')
+        .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.isEmailAvailable).to.be.true;
+        })
+    });
+
+    it('should return false if email is NOT available to use', () => {
+      return postUser({email:'joeyjiron06@gmail.com', password:'password'})
+        .then(() => verifyEmail('joeyjiron06@gmail.com'))
+        .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.isEmailAvailable).to.be.false;
+        })
+    });
   });
 
   describeSKIP('GET /user/token', () => {
