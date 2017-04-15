@@ -1,11 +1,8 @@
 const chai = require('chai');
 const server = require('../../index');
 const MockMongoose = require('../lib/mock-mongoose');
-const User = require('../../src/models/user');
 
 const { expect } = chai;
-
-const describeSKIP = function(name) { console.log('skipping test', name); };
 
 describe('User API', () => {
   before(() => {
@@ -306,11 +303,5 @@ describe('User API', () => {
           expect(res.body.isEmailAvailable).to.be.false;
         })
     });
-  });
-
-  describeSKIP('GET /user/token', () => {
-    // - invalid email
-    // - email does NOT exist
-    // - email does exist
   });
 });

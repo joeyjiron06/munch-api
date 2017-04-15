@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Feed  = require('./src/routes/feed');
 const User = require('./src/routes/user');
+const Auth = require('./src/routes/auth');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
@@ -30,6 +31,8 @@ app.route('/v1/user/update/password')
 app.route('/v1/user/verify-email')
   .post(User.verifyEmail);
 
+app.route('/v1/authenticate')
+  .post(Auth.postAuthenticate);
 
 console.log('listening on port', PORT);
 
