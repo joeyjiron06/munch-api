@@ -33,7 +33,7 @@ describe('Auth API', () => {
 
   describe('POST /authenticate', () => {
     it('should return a 400 user does not exist error if no user exists for that email', () => {
-      return authenticate('joeshmoe@gmail.com', 'password').catch((res) => {
+      return authenticate('joeshmoe@gmail.com', 'password').catch(res => {
         expect(res).to.have.status(400);
         expect(res.body).to.deep.equal({
           errors : {
@@ -43,6 +43,16 @@ describe('Auth API', () => {
       });
     });
     // - 400 invalid email
+    it('should return 400 when an invalid email is supplied', () => {
+      return authenticate('notAValidEmail','password').catch(res => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.deep.equal({
+          errors : {
+            email : 'You must supply a valid email'
+          }
+        });
+      });
+    });
     // - 400 password doest not match
     // - 200 username and password are correct, returns a jsonwebtoken cookie
   });

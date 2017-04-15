@@ -1,3 +1,4 @@
+const User = require('../models/user');
 
 /**
  * POST /authenticate
@@ -6,9 +7,19 @@
  * @param {Response} res
  */
 exports.postAuthenticate = function(req, res) {
-  res.status(400).json({
-    errors : {
-      user : 'User does not exist'
-    }
-  });
+  let { email } = req.body;
+
+  if (!User.isValidEmail(email)) {
+    res.status(400).json({
+      errors : {
+        email : 'You must supply a valid email'
+      }
+    });
+  } else {
+    res.status(400).json({
+      errors : {
+        user : 'User does not exist'
+      }
+    });
+  }
 };

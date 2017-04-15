@@ -60,4 +60,8 @@ UserSchema.methods.comparePassword = function(candidatePassword) {
   });
 };
 
+UserSchema.statics.isValidEmail = function(email) {
+  return isEmail(email);
+};
+
 module.exports = mongoose.model('User', UserSchema);
