@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
-const Schema = mongoose.Schema;
 const bcrypt = require('bcrypt-nodejs');
+const Schema = mongoose.Schema;
 const SALT_FACTOR = 10;
 
 const UserSchema = new Schema({
@@ -60,8 +60,35 @@ UserSchema.methods.comparePassword = function(candidatePassword) {
   });
 };
 
+UserSchema.statics.verify = function(email, password) {
+  let foundUser;
+  return this.findOne({email})
+    .then((user) => {
+      if (!user && !isEmail(email)) {
+        throw UserSchema.statics.ERROR.INVALID_EMAIL;
+      } else if (!user) {
+        throw UserSchema.statics.ERROR.USER_NOT_FOUND;
+      }
+      foundUser = user;
+      return user.comparePassword(password);
+    })
+    .then((isValidPassword) => {
+      if (!isValidPassword) {
+        throw UserSchema.statics.ERROR.INVALID_PASSWORD;
+      }
+
+      return foundUser;
+    });
+};
+
 UserSchema.statics.isValidEmail = function(email) {
   return isEmail(email);
 };
 
+
+UserSchema.statics.ERROR = {
+  USER_NOT_FOUND : 'USER_NOT_FOUND',
+  INVALID_EMAIL : 'INVALID_EMAIL',
+  INVALID_PASSWORD : 'INVALID_PASSWORD'
+};
 module.exports = mongoose.model('User', UserSchema);

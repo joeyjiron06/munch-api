@@ -2,6 +2,7 @@ const chai = require('chai');
 const server = require('../../index');
 const MockMongoose = require('../lib/mock-mongoose');
 const jwt = require('jsonwebtoken');
+const config = require('../../src/config');
 const { expect } = chai;
 
 describe('Auth API', () => {
@@ -118,7 +119,7 @@ describe('Auth API', () => {
         .then((res) => {
           let cookie = parseCookie(res.headers['set-cookie'][0]);
           expect(cookie.munchtoken, 'should have munchtoken cookie').to.not.be.empty;
-          expect(cookie.munchtoken, 'should be a valid json webtoken').to.satisfy(value => jwt.verify(value, process.env.jwt_secret));
+          expect(cookie.munchtoken, 'should be a valid json webtoken').to.satisfy(value => jwt.verify(value, config.jwtSecret));
         });
     });
   });

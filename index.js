@@ -3,11 +3,10 @@ const bodyParser = require('body-parser');
 const Feed  = require('./src/routes/feed');
 const User = require('./src/routes/user');
 const Auth = require('./src/routes/auth');
+const config = require('./src/config');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-
-const PORT = 8080;
 const app = express();
 
 
@@ -34,9 +33,9 @@ app.route('/v1/user/verify-email')
 app.route('/v1/authenticate')
   .post(Auth.postAuthenticate);
 
-console.log('listening on port', PORT);
+console.log('listening on port', config.port);
 
-app.listen(PORT);
+app.listen(config.port);
 
 
 module.exports = app;

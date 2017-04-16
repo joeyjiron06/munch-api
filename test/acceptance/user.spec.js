@@ -257,7 +257,6 @@ describe('User API', () => {
         });
     });
 
-    //invalid user id
     it('should return a 400 with error message when given a bad user id', () => {
       return updatePassword('password', 'newPassword', 'bogusIdThatDoesntExist')
         .catch((res) => {
