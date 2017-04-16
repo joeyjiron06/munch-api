@@ -27,7 +27,7 @@ const UserSchema = new Schema({
 UserSchema.pre('save', function(next) {
   const user = this;
 
-  if (!this.isModified('password')) {
+  if (!user.isModified('password')) {
     return next();
   }
 
@@ -55,24 +55,27 @@ UserSchema.methods.comparePassword = function(candidatePassword) {
       } else {
         resolve(isMatch);
       }
-
     });
   });
 };
 
-UserSchema.statics.verify = function(email, password) {
+/**
+ * Verify a password for a specific user
+ * Should pass either an id or email
+ * @param {object} options
+ * @param {string} options.id - the id of the user
+ * @param {string} options.email - the email of the user
+ * @param {string} password - the password of the user to verify
+ */
+UserSchema.statics.verifyPassword = function(options, password) {
   let foundUser;
-  return this.findOne({email})
-    .then((user) => {
-      if (!user && !isEmail(email)) {
-        throw UserSchema.statics.ERROR.INVALID_EMAIL;
-      } else if (!user) {
-        throw UserSchema.statics.ERROR.USER_NOT_FOUND;
-      }
+
+  return this.findUser(options)
+    .then(user => {
       foundUser = user;
       return user.comparePassword(password);
     })
-    .then((isValidPassword) => {
+    .then(isValidPassword => {
       if (!isValidPassword) {
         throw UserSchema.statics.ERROR.INVALID_PASSWORD;
       }
@@ -81,14 +84,41 @@ UserSchema.statics.verify = function(email, password) {
     });
 };
 
-UserSchema.statics.isValidEmail = function(email) {
-  return isEmail(email);
-};
 
+/**
+ * Find a user. If user is not found then it will throw an appropriate error
+ * @param {object} options
+ * @param {string} options.id - the id of the user
+ * @param {string} options.email - the email of the user
+ * @return Promise.<User|UserSchema.statics.ERROR> resolves with a user if found by id or email, or rejects with an error
+ */
+UserSchema.statics.findUser = function(options) {
+  let { id, email } = options;
+  let findUser = id ? this.findById(id) : this.findOne({email});
+
+  return findUser
+    .then((user) => {
+      if (!user && !isEmail(email)) {
+        throw UserSchema.statics.ERROR.INVALID_EMAIL;
+      } else if (!user) {
+        throw UserSchema.statics.ERROR.USER_NOT_FOUND;
+      }
+
+      return user;
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        throw UserSchema.statics.ERROR.USER_NOT_FOUND;
+      }
+
+      throw err;
+    });
+};
 
 UserSchema.statics.ERROR = {
   USER_NOT_FOUND : 'USER_NOT_FOUND',
   INVALID_EMAIL : 'INVALID_EMAIL',
   INVALID_PASSWORD : 'INVALID_PASSWORD'
 };
+
 module.exports = mongoose.model('User', UserSchema);

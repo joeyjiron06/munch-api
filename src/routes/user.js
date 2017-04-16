@@ -44,21 +44,15 @@ exports.postUser = function(req, res) {
 exports.deleteUser = function(req, res) {
   let { id } = req.body;
 
-  if (!id) {
-    res.status(400).json({
-      errors : {id: {message:'An id is required. Please send a json like follows {"id":"myUserId"}'}}
-    });
-  } else {
-    User.remove({_id:id})
-      .then(() => {
-        res.status(200).json({});
-      })
-      .catch(() => {
-        res.status(400).json({
-          errors : {id: {message:'A valid id is required. Please send a json like follows {"id":"myUserId"}'}}
-        });
+  User.remove({_id:id})
+    .then(() => {
+      res.status(200).json({});
+    })
+    .catch(() => {
+      res.status(400).json({
+        errors : {id: {message:'A valid id is required. Please send a json like follows {"id":"myUserId"}'}}
       });
-  }
+    });
 };
 
 /**
@@ -70,14 +64,14 @@ exports.deleteUser = function(req, res) {
 exports.getUser = function(req, res) {
   let { id } = req.body;
 
-  User.findOne({_id:id})
+  User.findById(id)
     .then((user) => {
       res.status(200).json({
         id : user._id,
         email : user.email
       });
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(400).json({
         errors : {
           id : {message : 'User not found'}
@@ -96,18 +90,10 @@ exports.updatePassword = function(req, res) {
 
   let { old_password, new_password, id } = req.body;
 
-  User.findOne({_id:id})
+  User.verifyPassword({id}, old_password)
     .then((user) => {
-      return user.comparePassword(old_password).then((isPasswordMatch) => { return {user, isPasswordMatch}; });
-    })
-    .then((res) => {
-      let {isPasswordMatch, user} = res;
-      if (isPasswordMatch) {
-        user.password = new_password;
-        return user.save();
-      } else {
-        return Promise.reject({kind:'WRONG_PASS'});
-      }
+      user.password = new_password;
+      return user.save();
     })
     .then((user) => {
       res.status(200).json({
@@ -116,19 +102,17 @@ exports.updatePassword = function(req, res) {
       });
     })
     .catch((err) => {
-      if (err.kind === 'WRONG_PASS') {
-        res.status(400).json({
-          errors : {old_password : {message : 'Your new password is invalid'}}
-        });
-      } else if (err.kind === 'ObjectId') {
-        res.status(400).json({
-          errors : {id: {message : 'User not found'}}
-        });
+      let errors = {};
+
+      if (err === User.ERROR.INVALID_PASSWORD) {
+        errors.old_password = {message : 'Your new password is invalid'};
+      } else if (err === User.ERROR.USER_NOT_FOUND) {
+        errors.id = {message : 'User not found'};
       } else {
-        res.status(400).json({
-          errors : {new_password : {message : err.errors.password.message}}
-        });
+        errors.new_password = {message : 'Invalid new password'};
       }
+
+      res.status(400).json({errors});
     });
 };
 
