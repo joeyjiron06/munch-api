@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
 /**
  * POST /authenticate
@@ -19,11 +20,14 @@ exports.postAuthenticate = function(req, res) {
     const USER_NOT_FOUND = 'USER_NOT_FOUND';
     const INVALID_PASSWORD = 'INVALID_PASSWORD';
 
+    let foundUser;
+
     User.findOne({email})
       .then((user) => {
         if (!user) {
           throw USER_NOT_FOUND;
         }
+        foundUser = user;
         return user.comparePassword(password);
       })
       .then((isValidPassword) => {
@@ -31,6 +35,12 @@ exports.postAuthenticate = function(req, res) {
           throw INVALID_PASSWORD;
         }
 
+        res.status(200)
+          .cookie('munchtoken', jwt.sign({id:foundUser.id}, process.env.jwt_secret))
+          .json({
+            id : foundUser.id,
+            email : foundUser.email
+          });
       })
       .catch((err) => {
         if (err === USER_NOT_FOUND) {
