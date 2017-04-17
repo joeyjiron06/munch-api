@@ -119,7 +119,7 @@ describe('Auth API', () => {
         .then((res) => {
           let cookie = parseCookie(res.headers['set-cookie'][0]);
           expect(cookie.munchtoken, 'should have munchtoken cookie').to.not.be.empty;
-          expect(cookie.munchtoken, 'should be a valid json webtoken').to.satisfy(value => jwt.verify(value, config.jwtSecret));
+          expect(cookie.munchtoken, 'should be a valid json webtoken').to.satisfy(value => jwt.decode(value, config.jwtSecret));
         });
     });
   });

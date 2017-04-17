@@ -1,6 +1,7 @@
 const chai = require('chai');
 const server = require('../../index');
 const MockMongoose = require('../lib/mock-mongoose');
+const MailDev = require('maildev');
 
 const { expect } = chai;
 
@@ -62,14 +63,15 @@ describe('User API', () => {
     });
   }
 
-  function updatePassword(oldPassword, newPassword, id) {
+  function updatePassword(oldPassword, newPassword, id, resetPasswordToken) {
     return new Promise((resolve, reject) => {
       chai.request(server)
         .post('/v1/user/update/password')
         .send({
           id: id,
           old_password: oldPassword,
-          new_password: newPassword
+          new_password: newPassword,
+          reset_password_token : resetPasswordToken
         })
         .end((err, res) => {
           if (err) {
@@ -84,7 +86,22 @@ describe('User API', () => {
   function verifyEmail(email) {
     return new Promise((resolve, reject) => {
       chai.request(server)
-        .post('/v1/user/verify-email')
+        .post('/v1/user/decode-email')
+        .send({email})
+        .end((err, res) => {
+          if (err) {
+            reject(res);
+          } else {
+            resolve(res);
+          }
+        });
+    });
+  }
+
+  function resetPassword(email) {
+    return new Promise((resolve, reject) => {
+      chai.request(server)
+        .post('/v1/user/reset-password')
         .send({email})
         .end((err, res) => {
           if (err) {
@@ -267,7 +284,6 @@ describe('User API', () => {
         });
     });
 
-
     it('should return a 200 and user when password is updated properly', () => {
       let userId;
       return postUser(user)
@@ -282,10 +298,9 @@ describe('User API', () => {
           //TODO get token with new password should return success as well
         });
     });
-
   });
 
-  describe('GET /user/verify-email', () => {
+  describe('GET /user/decode-email', () => {
     it('should return true if email is available to use', () => {
       return verifyEmail('joeyjiron06@gmail.com')
         .then((res) => {
@@ -301,6 +316,93 @@ describe('User API', () => {
           expect(res).to.have.status(200);
           expect(res.body.isEmailAvailable).to.be.false;
         })
+    });
+  });
+
+  describe('POST /user/reset-password', () => {
+    // create a fake mail server
+    let maildevServer;
+
+    before((done) => {
+      maildevServer = new MailDev({
+        port : 1025 // todo port
+      });
+      maildevServer.listen(() => done());
+    });
+
+    afterEach(() => {
+      maildevServer.removeAllListeners();
+    });
+
+    after((done) => {
+      maildevServer.end(() => done());
+    });
+
+
+    it('should return 400 when no email is specified and an error message', () => {
+      return resetPassword(null)
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors).to.deep.equal({
+            email : 'A valid email is required'
+          });
+        });
+    });
+
+    it('should return 400 when invalid email is sent and error message', () => {
+      return resetPassword('thisIsNotAValidEmailAddress')
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors).to.deep.equal({
+            email : 'A valid email is required'
+          });
+        });
+    });
+
+    it('should return 400 when user is not found with that email and an error message', () => {
+      return resetPassword('joeyjiron06@gmail.com')
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors).to.deep.equal({
+            user : 'User not found'
+          });
+        });
+    });
+
+    it('should return 200 when a valid email is given', () => {
+      return postUser({email:'test@test.com', password:'password'})
+        .then(() => resetPassword('test@test.com'))
+        .then((res) => {
+          expect(res).to.have.status(200);
+        });
+    });
+
+    it('should return a valid token that can be used for /user/update/password', () => {
+      return postUser({email:'test@test.com', password:'password'})
+        .then(() => resetPassword('test@test.com'))
+        .then((res) => {
+          let {id, token} = res.body;
+          return updatePassword(null, 'newPassword', id, token);
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+        })
+        .catch((err) => {
+          console.log('error in token', err);
+        })
+    });
+
+    it('should send an actual email with a token', (done) => {
+      // wait for mail server to receive a new email
+      maildevServer.on('new', email => {
+        expect(email, 'email exists').to.not.be.empty;
+        expect(email.headers.from, 'should be from joey jiron').to.include('Joey Jiron');
+        expect(email.headers.to, 'should be to the user').to.equal('test@test.com');
+        expect(email.html, 'should have a body that contains').to.not.be.empty;
+        done();
+      });
+      postUser({email:'test@test.com', password:'password'})
+        .then(() => resetPassword('test@test.com'))
     });
   });
 });

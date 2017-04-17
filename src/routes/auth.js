@@ -1,6 +1,5 @@
 const User = require('../models/user');
-const jwt = require('jsonwebtoken');
-const config = require('../config');
+const jwt = require('../utils/jwt');
 
 /**
  * POST /authenticate
@@ -14,7 +13,7 @@ exports.postAuthenticate = function(req, res) {
   User.verifyPassword({email}, password)
     .then((user) => {
       res.status(200)
-        .cookie('munchtoken', jwt.sign({id:user.id}, config.jwtSecret))
+        .cookie('munchtoken', jwt.encode({id:user.id}))
         .json({
           id : user.id,
           email : user.email

@@ -27,7 +27,10 @@ app.route('/v1/user')
 app.route('/v1/user/update/password')
   .post(User.updatePassword);
 
-app.route('/v1/user/verify-email')
+app.route('/v1/user/reset-password')
+  .post(User.resetPassword);
+
+app.route('/v1/user/decode-email')
   .post(User.verifyEmail);
 
 app.route('/v1/authenticate')

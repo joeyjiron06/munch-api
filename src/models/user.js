@@ -62,15 +62,15 @@ UserSchema.methods.comparePassword = function(candidatePassword) {
 /**
  * Verify a password for a specific user
  * Should pass either an id or email
- * @param {object} options
- * @param {string} options.id - the id of the user
- * @param {string} options.email - the email of the user
- * @param {string} password - the password of the user to verify
+ * @param {object} user
+ * @param {string} [user.id] - the id of the user
+ * @param {string} [user.email] - the email of the user
+ * @param {string} password - the password of the user to decode
  */
-UserSchema.statics.verifyPassword = function(options, password) {
+UserSchema.statics.verifyPassword = function(user, password) {
   let foundUser;
 
-  return this.findUser(options)
+  return this.findUser(user)
     .then(user => {
       foundUser = user;
       return user.comparePassword(password);
@@ -87,13 +87,13 @@ UserSchema.statics.verifyPassword = function(options, password) {
 
 /**
  * Find a user. If user is not found then it will throw an appropriate error
- * @param {object} options
- * @param {string} options.id - the id of the user
- * @param {string} options.email - the email of the user
+ * @param {object} user
+ * @param {string} [user.id] - the id of the user
+ * @param {string} [user.email] - the email of the user
  * @return Promise.<User|UserSchema.statics.ERROR> resolves with a user if found by id or email, or rejects with an error
  */
-UserSchema.statics.findUser = function(options) {
-  let { id, email } = options;
+UserSchema.statics.findUser = function(user) {
+  let { id, email } = user;
   let findUser = id ? this.findById(id) : this.findOne({email});
 
   return findUser
