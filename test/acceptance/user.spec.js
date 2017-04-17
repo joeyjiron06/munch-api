@@ -1,5 +1,6 @@
 const chai = require('chai');
 const server = require('../../index');
+const config = require('../../src/config');
 const MockMongoose = require('../lib/mock-mongoose');
 const MailDev = require('maildev');
 
@@ -114,7 +115,6 @@ describe('User API', () => {
   }
 
   describe('POST /user', () => {
-    // todo expect content-type json, ex expect(res).to.have.header('content-type', 'text/plain');
 
     it('should return 400 when no email is supplied', () => {
       return postUser({'password': 'hello1234'}).catch((res) => {
@@ -295,7 +295,6 @@ describe('User API', () => {
           expect(res).to.have.status(200);
           expect(res.body.email).to.equal('joeyjiron06@gmail.com');
           expect(res.body.id).to.equal(userId);
-          //TODO get token with new password should return success as well
         });
     });
   });
@@ -325,7 +324,7 @@ describe('User API', () => {
 
     before((done) => {
       maildevServer = new MailDev({
-        port : 1025 // todo port
+        port : config.nodemailer.port
       });
       maildevServer.listen(() => done());
     });

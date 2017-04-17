@@ -1,24 +1,8 @@
 
 const nodemailer = require('nodemailer');
-const testConfig = {
-  host: 'localhost',
-  secure: false,
-  ignoreTLS: true,
-  port: 1025
-};
+const config = require('../config');
 
-const prodConfig = {
-  service: 'gmail',
-  host: 'smtp.gmail.com',
-  secure: true,
-  auth: {
-    user: 'joeyjiron06@gmail.com',
-    pass: 'frosty6frosty6'
-  }
-};
-
-
-let transporter = nodemailer.createTransport(testConfig);
+let transporter = nodemailer.createTransport(config.nodemailer);
 
 /**
  * @param {object} email

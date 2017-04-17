@@ -5,7 +5,8 @@ const MockMongoose = require('./lib/mock-mongoose');
 
 chai.use(chaiHttp);
 
-process.env.jwt_secret = 'testing';
+process.env.JWT_SECRET = 'test_secret';
+process.env.NODE_ENV = 'test';
 
 // before tests run start start mongodb process which allows mongoose to connect to it
 prepare(function (done) {

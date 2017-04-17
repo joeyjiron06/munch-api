@@ -30,8 +30,6 @@ describe('/GET feed', () => {
     });
   }
 
-  // todo expect content-type json
-
   it('should return 400 status code and error message when no url is specified', () => {
     return getFeed(undefined).catch((res) => {
         expect(res.status).to.equal(400);

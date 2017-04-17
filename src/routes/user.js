@@ -166,9 +166,8 @@ exports.resetPassword = function(req, res) {
     .then((user) => {
       let token = jwt.encode({id:user.id});
 
-      // TODO unhardcode this
       Emailer.sendEmail({
-        from : '"Joey Jiron" <test@test.com>',
+        from : '"Joey Jiron" <test@test.com>', // TODO add the right email
         to : user.email,
         subject : 'Munch password reset',
         html: `<p>We heard that you lost your Munch password. Sorry about that!</p> 
