@@ -15,7 +15,8 @@ let transporter = nodemailer.createTransport(config.nodemailer);
 exports.sendEmail = function(email) {
   transporter.sendMail(email, (err) => {
     if (err) {
-      console.error('error sending email', email, err);
+      // TODO report an error here
+      // console.error(err);
     }
   });
 };

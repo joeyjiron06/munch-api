@@ -1,10 +1,9 @@
-const chai = require('chai');
-const server = require('../../index');
+const { expect }= require('chai');
 const config = require('../../src/config');
 const MockMongoose = require('../lib/mock-mongoose');
 const MailDev = require('maildev');
+const MunchAPI = require('../lib/munch-api');
 
-const { expect } = chai;
 
 describe('User API', () => {
   before(() => {
@@ -19,105 +18,10 @@ describe('User API', () => {
     return MockMongoose.clear();
   });
 
-  function postUser(user) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .post('/v1/user')
-        .send(user)
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
-  function deleteUser(id) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .delete(`/v1/user`)
-        .send({id})
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
-  function getUser(id) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .get('/v1/user')
-        .send({id})
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
-  function updatePassword(oldPassword, newPassword, id, resetPasswordToken) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .post('/v1/user/update/password')
-        .send({
-          id: id,
-          old_password: oldPassword,
-          new_password: newPassword,
-          reset_password_token : resetPasswordToken
-        })
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
-  function verifyEmail(email) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .post('/v1/user/decode-email')
-        .send({email})
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
-  function resetPassword(email) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .post('/v1/user/reset-password')
-        .send({email})
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
   describe('POST /user', () => {
 
     it('should return 400 when no email is supplied', () => {
-      return postUser({'password': 'hello1234'}).catch((res) => {
+      return MunchAPI.postUser({'password': 'hello1234'}).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body).to.be.an.object;
         expect(res.body.errors).to.be.an.object;
@@ -128,7 +32,7 @@ describe('User API', () => {
     });
 
     it('should return 400 when no password is supplied', () => {
-      return postUser({email: 'joey'}).catch((res) => {
+      return MunchAPI.postUser({email: 'joey'}).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email.message).to.not.be.empty;
         expect(res.body.errors.password.message).to.not.be.empty;
@@ -136,7 +40,7 @@ describe('User API', () => {
     });
 
     it('should return 400 when no body is supplied', () => {
-      return postUser(null).catch((res) => {
+      return MunchAPI.postUser(null).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email.message).to.not.be.empty;
         expect(res.body.errors.password.message).to.not.be.empty;
@@ -146,7 +50,7 @@ describe('User API', () => {
 
     it('should return 409 and email error message when email is already taken', () => {
       let user = {email:'joeyjiron06@gmail.com', password:'testpwd1234'};
-      return postUser(user).then((res) => postUser(user)).catch((res) => {
+      return MunchAPI.postUser(user).then((res) => MunchAPI.postUser(user)).catch((res) => {
         expect(res).to.have.status(409);
         expect(res.body.errors.email).to.not.be.empty;
       });
@@ -154,7 +58,7 @@ describe('User API', () => {
 
     it('should return a 400 and an email error message when email is not in the right formate', () => {
       let user = {email:'notTheRightFormat', password:'23asdfasdf'};
-      return postUser(user).catch((res) => {
+      return MunchAPI.postUser(user).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email).to.not.be.empty;
       });
@@ -162,7 +66,7 @@ describe('User API', () => {
 
     it('should return a 400 and password error when password is too short', () => {
       let user = {email:'joeyjiron06@gmail.com', password:'122'};
-      return postUser(user).catch((res) => {
+      return MunchAPI.postUser(user).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.email).to.be.undefined;
         expect(res.body.errors.password).to.not.be.empty;
@@ -171,7 +75,7 @@ describe('User API', () => {
 
     it('should return a 200 and user id when given good data', () => {
       let user = {email:'joeyjiron06@gmail.com', password:'12345678'};
-      return postUser(user).then((res) => {
+      return MunchAPI.postUser(user).then((res) => {
         expect(res).to.have.status(200);
         expect(res.body.id).to.not.be.empty;
         expect(res.body.email).to.equal('joeyjiron06@gmail.com');
@@ -182,14 +86,14 @@ describe('User API', () => {
   describe('DELETE /user', () => {
 
     it('should return a 400 when no user id is passed', () => {
-      return deleteUser(null).catch((res) => {
+      return MunchAPI.deleteUser(null).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id).to.not.be.empty;
       });
     });
 
     it('should return a 400 if user is not found', () => {
-      return deleteUser('1').catch((res) => {
+      return MunchAPI.deleteUser('1').catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id).to.not.be.empty;
       });
@@ -197,14 +101,14 @@ describe('User API', () => {
 
     it('should delete a saved user', () => {
       let userId;
-      return postUser({email:'joeyj@gmail.com', password:'password'})
+      return MunchAPI.postUser({email:'joeyj@gmail.com', password:'password'})
         .then((res) => {
           userId = res.body.id;
-          return deleteUser(userId);
+          return MunchAPI.deleteUser(userId);
         })
         .then((res) => {
           expect(res).to.have.status(200);
-          return getUser(userId);
+          return MunchAPI.getUser(userId);
         })
         .catch((res) => {
           expect(res).to.have.status(400);
@@ -216,14 +120,14 @@ describe('User API', () => {
   describe('GET /user', () => {
 
     it('should return 400 when not id is passed', () => {
-      return getUser(null).catch((res) => {
+      return MunchAPI.getUser(null).catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id.message).to.not.be.empty;
       });
     });
 
     it('should return 400 when no user found with id', () => {
-      return getUser('12fakeid').catch((res) => {
+      return MunchAPI.getUser('12fakeid').catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body.errors.id.message).to.not.be.empty;
       });
@@ -231,10 +135,10 @@ describe('User API', () => {
 
     it('should return 200 and user info when valid user id is given', () => {
       let userId;
-      return postUser({email:'jo@gmail.com', password:'password'})
+      return MunchAPI.postUser({email:'jo@gmail.com', password:'password'})
         .then((res) => {
           userId = res.body.id;
-          return getUser(userId);
+          return MunchAPI.getUser(userId);
         })
         .then((res) => {
           let user = res.body;
@@ -251,9 +155,9 @@ describe('User API', () => {
     let user = {email:'joeyjiron06@gmail.com', password:'password'};
 
     it('should return a 400 and error message when an invalid previous password is sent', () => {
-      return postUser(user)
+      return MunchAPI.postUser(user)
         .then((res) => {
-          return updatePassword('thewrongpassword', 'someNewPassword', res.body.id);
+          return MunchAPI.updatePassword('thewrongpassword', 'someNewPassword', res.body.id);
         })
         .catch((res) => {
           expect(res).to.have.status(400);
@@ -263,9 +167,9 @@ describe('User API', () => {
     });
 
     it('should return a 400 and error message when in invalid new password is sent', () => {
-      return postUser(user)
+      return MunchAPI.postUser(user)
         .then((res) => {
-          return updatePassword('password', '2short', res.body.id);
+          return MunchAPI.updatePassword('password', '2short', res.body.id);
         })
         .catch((res) => {
           expect(res).to.have.status(400);
@@ -275,7 +179,7 @@ describe('User API', () => {
     });
 
     it('should return a 400 with error message when given a bad user id', () => {
-      return updatePassword('password', 'newPassword', 'bogusIdThatDoesntExist')
+      return MunchAPI.updatePassword('password', 'newPassword', 'bogusIdThatDoesntExist')
         .catch((res) => {
           expect(res).to.have.status(400);
           expect(res.body.errors.id.message).to.not.be.empty;
@@ -286,10 +190,10 @@ describe('User API', () => {
 
     it('should return a 200 and user when password is updated properly', () => {
       let userId;
-      return postUser(user)
+      return MunchAPI.postUser(user)
         .then((res) => {
           userId = res.body.id;
-          return updatePassword('password', 'newPassword', res.body.id);
+          return MunchAPI.updatePassword('password', 'newPassword', res.body.id);
         })
         .then((res) => {
           expect(res).to.have.status(200);
@@ -301,7 +205,7 @@ describe('User API', () => {
 
   describe('GET /user/decode-email', () => {
     it('should return true if email is available to use', () => {
-      return verifyEmail('joeyjiron06@gmail.com')
+      return MunchAPI.verifyEmail('joeyjiron06@gmail.com')
         .then((res) => {
           expect(res).to.have.status(200);
           expect(res.body.isEmailAvailable).to.be.true;
@@ -309,8 +213,8 @@ describe('User API', () => {
     });
 
     it('should return false if email is NOT available to use', () => {
-      return postUser({email:'joeyjiron06@gmail.com', password:'password'})
-        .then(() => verifyEmail('joeyjiron06@gmail.com'))
+      return MunchAPI.postUser({email:'joeyjiron06@gmail.com', password:'password'})
+        .then(() => MunchAPI.verifyEmail('joeyjiron06@gmail.com'))
         .then((res) => {
           expect(res).to.have.status(200);
           expect(res.body.isEmailAvailable).to.be.false;
@@ -324,6 +228,7 @@ describe('User API', () => {
 
     before((done) => {
       maildevServer = new MailDev({
+        ip: '127.0.0.1',
         port : config.nodemailer.port
       });
       maildevServer.listen(() => done());
@@ -339,7 +244,7 @@ describe('User API', () => {
 
 
     it('should return 400 when no email is specified and an error message', () => {
-      return resetPassword(null)
+      return MunchAPI.resetPassword(null)
         .catch((res) => {
           expect(res).to.have.status(400);
           expect(res.body.errors).to.deep.equal({
@@ -349,7 +254,7 @@ describe('User API', () => {
     });
 
     it('should return 400 when invalid email is sent and error message', () => {
-      return resetPassword('thisIsNotAValidEmailAddress')
+      return MunchAPI.resetPassword('thisIsNotAValidEmailAddress')
         .catch((res) => {
           expect(res).to.have.status(400);
           expect(res.body.errors).to.deep.equal({
@@ -359,7 +264,7 @@ describe('User API', () => {
     });
 
     it('should return 400 when user is not found with that email and an error message', () => {
-      return resetPassword('joeyjiron06@gmail.com')
+      return MunchAPI.resetPassword('joeyjiron06@gmail.com')
         .catch((res) => {
           expect(res).to.have.status(400);
           expect(res.body.errors).to.deep.equal({
@@ -369,19 +274,19 @@ describe('User API', () => {
     });
 
     it('should return 200 when a valid email is given', () => {
-      return postUser({email:'test@test.com', password:'password'})
-        .then(() => resetPassword('test@test.com'))
+      return MunchAPI.postUser({email:'test@test.com', password:'password'})
+        .then(() => MunchAPI.resetPassword('test@test.com'))
         .then((res) => {
           expect(res).to.have.status(200);
         });
     });
 
     it('should return a valid token that can be used for /user/update/password', () => {
-      return postUser({email:'test@test.com', password:'password'})
-        .then(() => resetPassword('test@test.com'))
+      return MunchAPI.postUser({email:'test@test.com', password:'password'})
+        .then(() => MunchAPI.resetPassword('test@test.com'))
         .then((res) => {
           let {id, token} = res.body;
-          return updatePassword(null, 'newPassword', id, token);
+          return MunchAPI.updatePassword(null, 'newPassword', id, token);
         })
         .then((res) => {
           expect(res).to.have.status(200);
@@ -400,8 +305,8 @@ describe('User API', () => {
         expect(email.html, 'should have a body that contains').to.not.be.empty;
         done();
       });
-      postUser({email:'test@test.com', password:'password'})
-        .then(() => resetPassword('test@test.com'))
+      MunchAPI.postUser({email:'test@test.com', password:'password'})
+        .then(() => MunchAPI.resetPassword('test@test.com'))
     });
   });
 });

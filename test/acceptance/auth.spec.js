@@ -1,9 +1,11 @@
-const chai = require('chai');
-const server = require('../../index');
+const { expect } = require('chai');
 const MockMongoose = require('../lib/mock-mongoose');
 const jwt = require('jsonwebtoken');
 const config = require('../../src/config');
-const { expect } = chai;
+const {
+  authenticate,
+  postUser
+} = require('../lib/munch-api');
 
 describe('Auth API', () => {
   before(() => {
@@ -17,36 +19,6 @@ describe('Auth API', () => {
   beforeEach(() => {
     return MockMongoose.clear();
   });
-
-  function authenticate(email, password) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .post('/v1/authenticate')
-        .send({email, password})
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
-
-  function postUser(email, password) {
-    return new Promise((resolve, reject) => {
-      chai.request(server)
-        .post('/v1/user')
-        .send({email, password})
-        .end((err, res) => {
-          if (err) {
-            reject(res);
-          } else {
-            resolve(res);
-          }
-        });
-    });
-  }
 
   function parseCookie(cookie) {
     let result = {};
@@ -85,7 +57,7 @@ describe('Auth API', () => {
     });
 
     it('should return 400 if password does not match the password on file', () => {
-      return postUser('joeyjiron06@gmail.com', 'mylittlesecret')
+      return postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
         .then(() => authenticate('joeyjiron06@gmail.com', 'thisIsTheWrongPassword'))
         .catch((res) => {
           expect(res).to.have.status(400);
@@ -99,7 +71,7 @@ describe('Auth API', () => {
 
     it('should return a 200 success and json webtoken if email and password is correct', () => {
       let userId;
-      return postUser('joeyjiron06@gmail.com', 'mylittlesecret')
+      return postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
         .then((res) => {
           userId = res.body.id;
           return authenticate('joeyjiron06@gmail.com', 'mylittlesecret')
@@ -114,7 +86,7 @@ describe('Auth API', () => {
     });
 
     it('should return a json web token when login is susccessful', () => {
-      return postUser('joeyjiron06@gmail.com', 'mylittlesecret')
+      return postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
         .then((res) => authenticate('joeyjiron06@gmail.com', 'mylittlesecret'))
         .then((res) => {
           let cookie = parseCookie(res.headers['set-cookie'][0]);
