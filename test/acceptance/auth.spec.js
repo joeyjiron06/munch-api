@@ -2,10 +2,8 @@ const { expect } = require('chai');
 const MockMongoose = require('../lib/mock-mongoose');
 const jwt = require('jsonwebtoken');
 const config = require('../../src/config');
-const {
-  authenticate,
-  postUser
-} = require('../lib/munch-api');
+const MunchAPI = require('../lib/munch-api');
+const parseCookie = require('../lib/parse-cookie');
 
 describe('Auth API', () => {
   before(() => {
@@ -20,22 +18,11 @@ describe('Auth API', () => {
     return MockMongoose.clear();
   });
 
-  function parseCookie(cookie) {
-    let result = {};
 
-    cookie.split(';').forEach((kvPair) => {
-      let split = kvPair.split('=');
-      let key = split[0].trim();
-      let val = split[1].trim();
-      result[key] = val;
-    });
-
-    return result;
-  }
 
   describe('POST /authenticate', () => {
     it('should return a 400 user does not exist error if no user exists for that email', () => {
-      return authenticate('joeshmoe@gmail.com', 'password').catch((res) => {
+      return MunchAPI.authenticate('joeshmoe@gmail.com', 'password').catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body).to.deep.equal({
           errors : {
@@ -46,7 +33,7 @@ describe('Auth API', () => {
     });
 
     it('should return 400 when an invalid email is supplied', () => {
-      return authenticate('notAValidEmail','password').catch((res) => {
+      return MunchAPI.authenticate('notAValidEmail','password').catch((res) => {
         expect(res).to.have.status(400);
         expect(res.body).to.deep.equal({
           errors : {
@@ -57,8 +44,8 @@ describe('Auth API', () => {
     });
 
     it('should return 400 if password does not match the password on file', () => {
-      return postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
-        .then(() => authenticate('joeyjiron06@gmail.com', 'thisIsTheWrongPassword'))
+      return MunchAPI.postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
+        .then(() => MunchAPI.authenticate('joeyjiron06@gmail.com', 'thisIsTheWrongPassword'))
         .catch((res) => {
           expect(res).to.have.status(400);
           expect(res.body).to.deep.equal({
@@ -71,10 +58,10 @@ describe('Auth API', () => {
 
     it('should return a 200 success and json webtoken if email and password is correct', () => {
       let userId;
-      return postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
+      return MunchAPI.postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
         .then((res) => {
           userId = res.body.id;
-          return authenticate('joeyjiron06@gmail.com', 'mylittlesecret')
+          return MunchAPI.authenticate('joeyjiron06@gmail.com', 'mylittlesecret')
         })
         .then((res) => {
           expect(res).to.have.status(200);
@@ -86,8 +73,8 @@ describe('Auth API', () => {
     });
 
     it('should return a json web token when login is susccessful', () => {
-      return postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
-        .then((res) => authenticate('joeyjiron06@gmail.com', 'mylittlesecret'))
+      return MunchAPI.postUser({email:'joeyjiron06@gmail.com', password:'mylittlesecret'})
+        .then((res) => MunchAPI.authenticate('joeyjiron06@gmail.com', 'mylittlesecret'))
         .then((res) => {
           let cookie = parseCookie(res.headers['set-cookie'][0]);
           expect(cookie.munchtoken, 'should have munchtoken cookie').to.not.be.empty;

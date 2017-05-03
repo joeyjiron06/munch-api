@@ -11,16 +11,24 @@ class MunchAPI {
     return MunchAPI.fetch(url, 'POST', data);
   }
 
-  static del(url, data) {
-    return MunchAPI.fetch(url, 'delete', data);
+  static del(url, data, headers) {
+    return MunchAPI.fetch(url, 'delete', data, headers);
   }
 
-  static fetch(url, method, data) {
+  static fetch(url, method, data, headers) {
     return new Promise((resolve, reject) => {
       let request = chai.request(server);
       method = method.toLowerCase();
 
-      request[method](url)
+      headers = headers || {};
+
+      request = request[method](url);
+
+      for (let key in headers) {
+        request = request.set(key, headers[key]);
+      }
+
+      request
         .send(data)
         .end((err, res) => {
           if (err) {
@@ -37,8 +45,9 @@ class MunchAPI {
     return MunchAPI.post('/v1/user', user);
   }
 
-  static deleteUser(id) {
-    return MunchAPI.del('/v1/user', {id});
+  static deleteUser(token) {
+    let headers = token ? {cookie:`munchtoken=${token}`} : null;
+    return MunchAPI.del('/v1/user', {}, headers);
   }
 
   static getUser(id) {

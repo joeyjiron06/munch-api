@@ -44,7 +44,7 @@ exports.postUser = function(req, res) {
  * @param {Response} res
  */
 exports.deleteUser = function(req, res) {
-  let { id } = req.body;
+  let { id } = req.user;
 
   User.remove({_id:id})
     .then(() => {

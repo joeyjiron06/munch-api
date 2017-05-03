@@ -36,3 +36,26 @@ exports.postAuthenticate = function(req, res) {
       res.status(400).json({errors});
     });
 };
+
+/**
+ * Verify that the user is authed with a cookie
+ * @param req
+ * @param res
+ * @param next
+ */
+exports.verifyUser = function(req, res, next) {
+  let munchtoken = req.cookies.munchtoken;
+
+  let user = jwt.decode(munchtoken) || {};
+
+  User.findById(user.id)
+    .then((user) => {
+      if (user) {
+        req.user = user;
+        next();
+      } else {
+        res.status(401).json({});
+        next(new Error('no user found'));
+      }
+    });
+};

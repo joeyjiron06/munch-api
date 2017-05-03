@@ -5,6 +5,7 @@ const User = require('./src/routes/user');
 const Auth = require('./src/routes/auth');
 const config = require('./src/config');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 
 const app = express();
@@ -13,6 +14,7 @@ const app = express();
 mongoose.Promise = Promise;
 
 app.use(cors());// add cors headers to all requests
+app.use(cookieParser());
 app.use(bodyParser.json());
 
 app.route('/v1/feed')
@@ -22,7 +24,7 @@ app.route('/v1/feed')
 app.route('/v1/user')
   .post(User.postUser)
   .get(User.getUser)
-  .delete(User.deleteUser);
+  .delete(Auth.verifyUser, User.deleteUser);
 
 app.route('/v1/user/update/password')
   .post(User.updatePassword);

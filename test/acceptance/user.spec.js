@@ -3,6 +3,7 @@ const config = require('../../src/config');
 const MockMongoose = require('../lib/mock-mongoose');
 const MailDev = require('maildev');
 const MunchAPI = require('../lib/munch-api');
+const parseCookie = require('../lib/parse-cookie');
 
 
 describe('User API', () => {
@@ -85,30 +86,51 @@ describe('User API', () => {
 
   describe('DELETE /user', () => {
 
-    it('should return a 400 when no user id is passed', () => {
-      return MunchAPI.deleteUser(null).catch((res) => {
-        expect(res).to.have.status(400);
-        expect(res.body.errors.id).to.not.be.empty;
-      });
+    it('should return a 401 if no webtoken is present', () => {
+      return MunchAPI.postUser({email:'joeyj@gmail.com', password:'password'})
+        .then((res) => {
+          return MunchAPI.deleteUser(res.body.id);
+        })
+        .then(() => {
+          throw new Error('should throw an error')
+        })
+        .catch((res) => {
+          expect(res).to.have.status(401);
+        });
     });
 
-    it('should return a 400 if user is not found', () => {
-      return MunchAPI.deleteUser('1').catch((res) => {
-        expect(res).to.have.status(400);
-        expect(res.body.errors.id).to.not.be.empty;
-      });
+    it('should return a 401 if an invalied webtoken is received', () => {
+      return MunchAPI.postUser({email:'joeyj@gmail.com', password:'password'})
+        .then((res) => {
+          return MunchAPI.deleteUser(res.body.id, 'badwebtoken');
+        })
+        .then(() => {
+          throw new Error('should throw an error')
+        })
+        .catch((res) => {
+          expect(res).to.have.status(401);
+        });
     });
 
-    it('should delete a saved user', () => {
+    it('should delete a saved user if a valid json webtoken is present in the request', () => {
+      let jsonWebToken;
       let userId;
       return MunchAPI.postUser({email:'joeyj@gmail.com', password:'password'})
         .then((res) => {
           userId = res.body.id;
-          return MunchAPI.deleteUser(userId);
+          return MunchAPI.authenticate('joeyj@gmail.com', 'password');
+        })
+        .then((res) => {
+          let cookie = parseCookie(res.headers['set-cookie'][0]);
+          jsonWebToken = cookie.munchtoken;
+          return MunchAPI.deleteUser(jsonWebToken);
         })
         .then((res) => {
           expect(res).to.have.status(200);
           return MunchAPI.getUser(userId);
+        })
+        .then(() => {
+          throw new Error('should be rejected');
         })
         .catch((res) => {
           expect(res).to.have.status(400);
