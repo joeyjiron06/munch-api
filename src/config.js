@@ -5,21 +5,10 @@ const {
   PORT
 } = process.env;
 
-const jwtSecret = fs.readFileSync('.jwt.secret').toString();
-const emailSecret = fs.readFileSync('.emailpassword.secret').toString();
-
 const config = {
-  jwtSecret : JWT_SECRET || jwtSecret,
+  jwtSecret : JWT_SECRET || fs.readFileSync('.jwt.secret').toString(),
   port : PORT || 8080,
-  nodemailer : {
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    secure: true,
-    auth: {
-      user: 'joeyjiron06@gmail.com',
-      pass: emailSecret
-    }
-  }
+  nodemailer : {}
 };
 
 if (NODE_ENV === 'test') {
@@ -28,6 +17,16 @@ if (NODE_ENV === 'test') {
     secure: false,
     ignoreTLS: true,
     port: 1025
+  };
+} else {
+  config.nodemailer = {
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    secure: true,
+    auth: {
+      user: 'joeyjiron06@gmail.com',
+      pass: fs.readFileSync('.emailpassword.secret').toString()
+    }
   };
 }
 
