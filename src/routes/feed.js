@@ -108,18 +108,14 @@ exports.getArticles = function(req, res) {
       res.status(200).json(foundFeed);
     })
     .catch((err) => {
+      let errors = {};
+
       if (err === FEED_NOT_FOUND) {
-        res.status(400).json({
-          errors : {
-            id : 'You must supply a valid id'
-          }
-        });
+        errors.id = 'You must supply a valid id';
       } else {
-        res.status(400).json({
-          errors : {
-            feed : 'Error fetching your feed'
-          }
-        });
+        errors.feed = 'Error fetching your feed';
       }
+
+      res.status(400).json({errors});
     });
 };
