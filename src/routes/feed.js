@@ -15,10 +15,6 @@ exports.getFeed = function(req, res) {
 
   Feed.findById(id)
     .then((feed) => {
-      if (!feed) {
-        throw new Error('not found');
-      }
-
       res.status(200).json(feed.toJSON());
     })
     .catch(() => {
