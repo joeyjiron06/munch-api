@@ -24,6 +24,10 @@ app.route('/v1/feeds')
 app.route('/v1/feeds/:id')
   .get(Feed.getFeed);
 
+app.route('/v1/feeds/:id/articles')
+  .get(Feed.getArticles);
+
+
 app.route('/v1/user')
   .post(User.postUser)
   .get(User.getUser)

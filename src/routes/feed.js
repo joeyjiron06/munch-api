@@ -25,26 +25,6 @@ exports.getFeed = function(req, res) {
         }
       });
     });
-
-
-  // if (req.query.url) {
-  //   Feeds.fetch(req.query.url)
-  //     .then((feed) => {
-  //       res.status(200)
-  //         .json(feed);
-  //     })
-  //     .catch((response) => {
-  //       res.status(400).json({
-  //         url : req.query.url,
-  //         message : 'invalid url'
-  //       })
-  //     });
-  //
-  // } else {
-  //   res.status(400).json({
-  //     message : 'You must specify a feed url'
-  //   })
-  // }
 };
 
 /**
@@ -96,5 +76,34 @@ exports.addFeed = function(req, res) {
           }
         });
       }
+    });
+};
+
+/**
+ * GET /feeds/:id/articles
+ * Get the current articles of a certain feed
+ * @param req
+ * @param res
+ */
+exports.getArticles = function(req, res) {
+  let {id} = req.params;
+  let foundFeed;
+  Feed.findById(id)
+    .then((feed) => {
+      foundFeed = feed;
+      return Feeds.fetch(feed.url);
+    })
+    .then((feed) => {
+      foundFeed = foundFeed.toJSON();
+      foundFeed.articles = feed.items;
+
+      res.status(200).json(foundFeed);
+    })
+    .catch((err) => {
+      res.status(400).json({
+        errors : {
+          id : 'You must supply a valid id'
+        }
+      });
     });
 };

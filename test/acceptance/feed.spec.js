@@ -4,6 +4,7 @@ const chaiHttp = require('chai-http');
 const mockServer = require('../lib/mock-server');
 const MunchAPI = require('../lib/munch-api');
 const MockMongoose = require('../lib/mock-mongoose');
+const isURL = require('validator/lib/isURL');
 
 const expect = chai.expect;
 
@@ -45,15 +46,41 @@ describe('Feed API', () => {
   });
 
 
-  // describe('GET /feeds/{id}/articles', () => {
-  //   it('should return status 400 when invalid feed id is specified', () => {
-  //
-  //   });
-  //
-  //   it('should return status 200 and a feed with articles', () => {
-  //
-  //   });
-  // });   //TODO unit tests for cache
+  describe('GET /feeds/{id}/articles', () => {
+    before(() => mockServer.init(4000));
+    after(() => mockServer.destroy(4000));
+
+    it('should return status 400 when invalid feed id is specified', () => {
+      return MunchAPI.getArticles('badFeedID')
+        .then(() => {
+          throw new Error('should throw an error');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.id).to.equal('You must supply a valid id');
+        });
+    });
+
+    //TODO URL ERROR
+
+    it('should return status 200 and a feed with articles', () => {
+      let url = mockServer.getUrl('/atom.feed.xml');
+      return MunchAPI.addFeed({title:'Dev', url})
+        .then((res) => {
+          return MunchAPI.getArticles(res.body.id);
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.id).to.not.be.empty;
+          expect(res.body.title).to.equal('Dev');
+          expect(res.body.articles).to.be.an.instanceOf(Array);
+          expect(res.body.articles).to.have.length(2);
+          expect(res.body.articles[0].link).to.satisfy((val) => isURL(val));
+          expect(res.body.articles[0].title).to.not.be.empty;
+          expect(res.body.articles[0].img_url).to.not.be.empty;
+        });
+    });
+  });   //TODO unit tests for cache
 
 
   describe('PUT /feeds', () => {

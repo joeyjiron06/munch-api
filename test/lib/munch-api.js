@@ -91,6 +91,10 @@ class MunchAPI {
     return MunchAPI.fetch(`/v1/feeds/${id}`, 'GET');
   }
 
+  static getArticles(id) {
+    return MunchAPI.fetch(`/v1/feeds/${id}/articles`, 'GET');
+  }
+
   static authenticate(email, password) {
   return new Promise((resolve, reject) => {
     chai.request(server)
