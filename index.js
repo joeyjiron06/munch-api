@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Feed  = require('./src/routes/feed');
 const User = require('./src/routes/user');
+const Me = require('./src/routes/me');
 const Auth = require('./src/routes/auth');
 const config = require('./src/config');
 const cors = require('cors');
@@ -21,6 +22,9 @@ app.route('/v1/feed')
   .get(Feed.getFeed);
 
 
+app.route('/v1/feeds')
+  .put(Feed.addFeed);
+
 app.route('/v1/user')
   .post(User.postUser)
   .get(User.getUser)
@@ -37,6 +41,11 @@ app.route('/v1/user/decode-email')
 
 app.route('/v1/authenticate')
   .post(Auth.postAuthenticate);
+
+
+app.route('/v1/me/feeds')
+  .get(Auth.verifyUser, Me.getFeeds)
+  .put(Auth.verifyUser, Me.addFeed);
 
 console.log('listening on port', config.port);
 

@@ -1,4 +1,5 @@
 const Feeds = require('../Feeds');
+const Feed = require('../models/feed');
 
 /**
  * GET /feed
@@ -25,4 +26,56 @@ exports.getFeed = function(req, res) {
       message : 'You must specify a feed url'
     })
   }
+};
+
+/**
+ * PUT /feeds
+ * Add a feed
+ * @param req
+ * @param res
+ */
+exports.addFeed = function(req, res) {
+  let {title, url} = req.body;
+  let feed = new Feed({title, url});
+
+
+  feed.save()
+    .then((feed) => {
+      res.status(200).json(feed);
+    })
+    .catch((err) => {
+      if (err.code === 11000) {
+        Feed.findOne({url})
+          .then((feed) => {
+
+            res.status(400).json({
+              feed : feed.toJSON(),
+              errors : {
+                url : 'Url is already taken'
+              }
+            });
+          })
+          .catch((err) => {
+            res.status(400).json({
+              feed : feed.toJSON(),
+              errors : {
+                url : 'Url is already taken'
+              }
+            });
+          });
+
+      } else if (err.errors.title) {
+        res.status(400).json({
+          errors : {
+            title : 'You must post a valid title'
+          }
+        });
+      } else if (err.errors.url) {
+        res.status(400).json({
+          errors : {
+            url : 'You must post a valid url'
+          }
+        });
+      }
+    });
 };
