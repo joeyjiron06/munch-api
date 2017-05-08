@@ -45,7 +45,8 @@ app.route('/v1/authenticate')
 
 app.route('/v1/me/feeds')
   .get(Auth.verifyUser, Me.getFeeds)
-  .put(Auth.verifyUser, Me.addFeed);
+  .put(Auth.verifyUser, Me.addFeed)
+  .delete(Auth.verifyUser, Me.deleteFeed);
 
 
 console.log('listening on port', config.port);

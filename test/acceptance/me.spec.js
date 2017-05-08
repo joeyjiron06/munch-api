@@ -1,9 +1,7 @@
 const { expect }= require('chai');
 const config = require('../../src/config');
 const MockMongoose = require('../lib/mock-mongoose');
-const MailDev = require('maildev');
 const MunchAPI = require('../lib/munch-api');
-const parseCookie = require('../lib/parse-cookie');
 const requireAuth = require('../lib/require-auth');
 
 
@@ -63,7 +61,7 @@ describe('Me API', () => {
     });
   });
 
-  describe('PUT me/feeds', () => {
+  describe('PUT /me/feeds', () => {
     requireAuth('PUT', '/v1/me/feeds');
 
     it('should return status 400 and error message when no id is sent', () => {
@@ -103,16 +101,37 @@ describe('Me API', () => {
         });
     });
   });
-  //
-  // describe('DELETE me/feeds/{id}', () => {
-  //   requireAuth('DELETE', '/v1/me/feeds/1');
-  //
-  //   it('should return 400 if an invalid id is given', () => {
-  //
-  //   });
-  //
-  //   it('should delete a feed for an authenticated user', () => {
-  //
-  //   });
-  // });
+
+  describe('DELETE /me/feeds', () => {
+    requireAuth('DELETE', '/v1/me/feeds');
+
+    it('should return status 400 if the id is not in the users list', () => {
+      return MunchAPI.removeFromMyFeeds('idIsNotInMyList', user.munchtoken)
+        .then(() => {
+          throw new Error('should throw an error');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.id).to.equal('User does not have that id saved in the list');
+        });
+    });
+
+    it('should delete a feed from user', () => {
+      return MunchAPI.addFeed({url:'https://verge.com/rss.xml', title:'The Verge'})
+        .then((res) => {
+          return MunchAPI.addToMyFeeds(res.body.id, user.munchtoken);
+        })
+        .then((res) => {
+          return MunchAPI.removeFromMyFeeds(res.body.id, user.munchtoken);
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          return MunchAPI.getMyFeeds(user.munchtoken);
+        })
+        .then((res) => {
+          expect(res.body).to.be.an.instanceOf(Array);
+          expect(res.body).to.have.length(0);
+        });
+    });
+  });
 });

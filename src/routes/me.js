@@ -47,3 +47,35 @@ exports.addFeed = function(req, res) {
       });
     });
 };
+
+/**
+ * DELETE /me/feeds
+ * Remove a feed from a user's list
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.deleteFeed = function (req, res) {
+  let user = req.user;
+  let feedId = req.body.id;
+
+  let originalLength = user.feeds.length;
+
+  user.feeds = user.feeds.filter((feedObjectId) => {
+    return feedObjectId.toString() !== feedId;
+  });
+
+  if (originalLength === user.feeds.length) {
+    res.status(400).json({
+      errors : {
+        id : 'User does not have that id saved in the list'
+      }
+    })
+  } else {
+    user.save()
+      .then(() => {
+        res.status(200).json({});
+      });
+  }
+
+
+};
