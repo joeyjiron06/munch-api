@@ -61,7 +61,21 @@ describe('Feed API', () => {
         });
     });
 
-    //TODO URL ERROR
+    it('should return status 400 and error message when it cannot fetch a url for a feed', () => {
+      let url = mockServer.getUrl('/somePathThatDoesNotExist');
+      return MunchAPI.addFeed({title:'Dev', url})
+        .then((res) => {
+          return MunchAPI.getArticles(res.body.id);
+        })
+        .then(() => {
+          throw new Error('should throw an error');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.feed).to.equal('Error fetching your feed');
+        });
+    });
+
 
     it('should return status 200 and a feed with articles', () => {
       let url = mockServer.getUrl('/atom.feed.xml');

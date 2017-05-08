@@ -1,6 +1,9 @@
 const Feeds = require('../Feeds');
 const Feed = require('../models/feed');
 
+const FEED_NOT_FOUND = 'FEED_NOT_FOUND';
+const FEED_HTTP_ERROR = 'FEED_HTTP_ERROR';
+
 /**
  * GET /feed
  * Parse a feed given a url
@@ -87,8 +90,13 @@ exports.addFeed = function(req, res) {
  */
 exports.getArticles = function(req, res) {
   let {id} = req.params;
+
   let foundFeed;
-  Feed.findById(id)
+
+  return Feed.findById(id)
+    .catch(() => {
+      throw FEED_NOT_FOUND;
+    })
     .then((feed) => {
       foundFeed = feed;
       return Feeds.fetch(feed.url);
@@ -100,10 +108,18 @@ exports.getArticles = function(req, res) {
       res.status(200).json(foundFeed);
     })
     .catch((err) => {
-      res.status(400).json({
-        errors : {
-          id : 'You must supply a valid id'
-        }
-      });
+      if (err === FEED_NOT_FOUND) {
+        res.status(400).json({
+          errors : {
+            id : 'You must supply a valid id'
+          }
+        });
+      } else {
+        res.status(400).json({
+          errors : {
+            feed : 'Error fetching your feed'
+          }
+        });
+      }
     });
 };
