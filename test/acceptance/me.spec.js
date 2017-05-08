@@ -46,7 +46,10 @@ describe('Me API', () => {
     });
 
     it('should return status 200 and an array of feeds for the signed in user', () => {
-      return MunchAPI.addFeed({url:'https://verge.com/rss.xml', title:'The Verge'}, user.munchtoken)
+      return MunchAPI.addFeed({url:'https://verge.com/rss.xml', title:'The Verge'})
+        .then((res) => {
+          return MunchAPI.addToMyFeeds(res.body.id, user.munchtoken);
+        })
         .then(() => {
           return MunchAPI.getMyFeeds(user.munchtoken);
         })
@@ -63,11 +66,42 @@ describe('Me API', () => {
   describe('PUT me/feeds', () => {
     requireAuth('PUT', '/v1/me/feeds');
 
+    it('should return status 400 and error message when no id is sent', () => {
+      return MunchAPI.addToMyFeeds(null, user.munchtoken)
+        .then(() => {
+          throw new Error('should throw an error');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.id).to.be.equal('You must supply a valid id');
+        });
+    });
 
+    it('should return status 400 and error message when an invalid id is sent', () => {
+      return MunchAPI.addToMyFeeds('someInvalidID', user.munchtoken)
+        .then(() => {
+          throw new Error('should throw an error');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.id).to.be.equal('You must supply a valid id');
+        });
+    });
 
-    // it('should return status 200 when an authenticated user adds a feed', () => {
-    //
-    // });
+    it('should return status 200 when an authenticated user adds a feed', () => {
+      return MunchAPI.addFeed({url:'https://verge.com/rss.xml', title:'The Verge'})
+        .then((res) => {
+          return MunchAPI.addToMyFeeds(res.body.id, user.munchtoken);
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.id).to.not.be.empty;
+          expect(res.body.title).to.equal('The Verge');
+          expect(res.body.url).to.equal('https://verge.com/rss.xml');
+
+          return MunchAPI.getMyFeeds(user.munchtoken);
+        });
+    });
   });
   //
   // describe('DELETE me/feeds/{id}', () => {

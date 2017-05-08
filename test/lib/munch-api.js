@@ -83,6 +83,10 @@ class MunchAPI {
     return MunchAPI.fetch('/v1/feeds', 'PUT', feed);
   }
 
+  static addToMyFeeds(feedId, munchtoken) {
+    return MunchAPI.fetch('/v1/me/feeds', 'PUT', {id:feedId}, {cookie:`munchtoken=${munchtoken}`});
+  }
+
   static authenticate(email, password) {
   return new Promise((resolve, reject) => {
     chai.request(server)
