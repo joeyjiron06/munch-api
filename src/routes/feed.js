@@ -1,13 +1,6 @@
 const Feeds = require('../Feeds');
 const Feed = require('../models/feed');
-
-const ERROR_MESSAGES = {
-  INVALID_ID : 'You must supply a valid id',
-  INVALID_URL : 'You must supply a valid url',
-  INVALID_TITLE :  'You must post a valid title',
-  URL_TAKEN : 'Url is already taken',
-  FEED_HTTP_ERROR : 'Error fetching your feed'
-};
+const ERROR_MESSAGES = require('../utils/error-messages');
 
 const FEED_NOT_FOUND = 'FEED_NOT_FOUND';
 const FEED_HTTP_ERROR = 'FEED_HTTP_ERROR';

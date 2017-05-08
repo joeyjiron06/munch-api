@@ -5,6 +5,7 @@ const mockServer = require('../lib/mock-server');
 const MunchAPI = require('../lib/munch-api');
 const MockMongoose = require('../lib/mock-mongoose');
 const isURL = require('validator/lib/isURL');
+const ERROR_MESSAGES = require('../../src/utils/error-messages');
 
 const expect = chai.expect;
 
@@ -27,7 +28,7 @@ describe('Feed API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.equal('You must supply a valid id');
+          expect(res.body.errors.id).to.equal(ERROR_MESSAGES.INVALID_ID);
         });
     });
 
@@ -57,7 +58,7 @@ describe('Feed API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.equal('You must supply a valid id');
+          expect(res.body.errors.id).to.equal(ERROR_MESSAGES.INVALID_ID);
         });
     });
 
@@ -72,7 +73,7 @@ describe('Feed API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.feed).to.equal('Error fetching your feed');
+          expect(res.body.errors.feed).to.equal(ERROR_MESSAGES.FEED_HTTP_ERROR);
         });
     });
 
@@ -105,7 +106,7 @@ describe('Feed API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.title).to.be.equal('You must post a valid title');
+          expect(res.body.errors.title).to.be.equal(ERROR_MESSAGES.INVALID_TITLE);
         });
     });
 
@@ -117,7 +118,7 @@ describe('Feed API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.url).to.be.equal('You must post a valid url');
+          expect(res.body.errors.url).to.be.equal(ERROR_MESSAGES.INVALID_URL);
         });
     });
 
@@ -131,7 +132,7 @@ describe('Feed API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.url).to.be.equal('Url is already taken');
+          expect(res.body.errors.url).to.be.equal(ERROR_MESSAGES.URL_TAKEN);
           expect(res.body.feed.id).to.not.be.empty;
           expect(res.body.feed.title).to.be.equal('The Verge');
           expect(res.body.feed.url).to.be.equal('https://theverge.com/rss.xml');
