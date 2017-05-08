@@ -1,6 +1,14 @@
 const Feeds = require('../Feeds');
 const Feed = require('../models/feed');
 
+const ERROR_MESSAGES = {
+  INVALID_ID : 'You must supply a valid id',
+  INVALID_URL : 'You must supply a valid url',
+  INVALID_TITLE :  'You must post a valid title',
+  URL_TAKEN : 'Url is already taken',
+  FEED_HTTP_ERROR : 'Error fetching your feed'
+};
+
 const FEED_NOT_FOUND = 'FEED_NOT_FOUND';
 const FEED_HTTP_ERROR = 'FEED_HTTP_ERROR';
 
@@ -20,7 +28,7 @@ exports.getFeed = function(req, res) {
     .catch(() => {
       res.status(400).json({
         errors : {
-          id : 'You must supply a valid id'
+          id : ERROR_MESSAGES.INVALID_ID
         }
       });
     });
@@ -42,38 +50,32 @@ exports.addFeed = function(req, res) {
       res.status(200).json(feed);
     })
     .catch((err) => {
+      // URL IS TAKEN - find it and return it to the client
       if (err.code === 11000) {
         Feed.findOne({url})
           .then((feed) => {
-
             res.status(400).json({
               feed : feed.toJSON(),
               errors : {
-                url : 'Url is already taken'
-              }
-            });
-          })
-          .catch((err) => {
-            res.status(400).json({
-              feed : feed.toJSON(),
-              errors : {
-                url : 'Url is already taken'
+                url : ERROR_MESSAGES.URL_TAKEN
               }
             });
           });
+      }
 
-      } else if (err.errors.title) {
-        res.status(400).json({
-          errors : {
-            title : 'You must post a valid title'
-          }
-        });
-      } else if (err.errors.url) {
-        res.status(400).json({
-          errors : {
-            url : 'You must post a valid url'
-          }
-        });
+      // ERROR SAVING FEED - didnt meet requirements
+      else {
+        let errors = {};
+
+        if (err.errors.title) {
+          errors.title = ERROR_MESSAGES.INVALID_TITLE;
+        }
+
+        if (err.errors.url) {
+          errors.url = ERROR_MESSAGES.INVALID_URL;
+        }
+
+        res.status(400).json({errors});
       }
     });
 };
@@ -107,9 +109,9 @@ exports.getArticles = function(req, res) {
       let errors = {};
 
       if (err === FEED_NOT_FOUND) {
-        errors.id = 'You must supply a valid id';
+        errors.id = ERROR_MESSAGES.INVALID_ID;
       } else {
-        errors.feed = 'Error fetching your feed';
+        errors.feed = ERROR_MESSAGES.FEED_HTTP_ERROR;
       }
 
       res.status(400).json({errors});
