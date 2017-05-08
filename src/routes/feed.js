@@ -8,24 +8,43 @@ const Feed = require('../models/feed');
  * @param {Response} res
  */
 exports.getFeed = function(req, res) {
-  if (req.query.url) {
-    Feeds.fetch(req.query.url)
-      .then((feed) => {
-        res.status(200)
-          .json(feed);
-      })
-      .catch((response) => {
-        res.status(400).json({
-          url : req.query.url,
-          message : 'invalid url'
-        })
-      });
+  let {id} = req.params;
 
-  } else {
-    res.status(400).json({
-      message : 'You must specify a feed url'
+  Feed.findById(id)
+    .then((feed) => {
+      if (!feed) {
+        throw new Error('not found');
+      }
+
+      res.status(200).json(feed.toJSON());
     })
-  }
+    .catch(() => {
+      res.status(400).json({
+        errors : {
+          id : 'You must supply a valid id'
+        }
+      });
+    });
+
+
+  // if (req.query.url) {
+  //   Feeds.fetch(req.query.url)
+  //     .then((feed) => {
+  //       res.status(200)
+  //         .json(feed);
+  //     })
+  //     .catch((response) => {
+  //       res.status(400).json({
+  //         url : req.query.url,
+  //         message : 'invalid url'
+  //       })
+  //     });
+  //
+  // } else {
+  //   res.status(400).json({
+  //     message : 'You must specify a feed url'
+  //   })
+  // }
 };
 
 /**

@@ -18,12 +18,11 @@ app.use(cors());// add cors headers to all requests
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-app.route('/v1/feed')
-  .get(Feed.getFeed);
-
-
 app.route('/v1/feeds')
   .put(Feed.addFeed);
+
+app.route('/v1/feeds/:id')
+  .get(Feed.getFeed);
 
 app.route('/v1/user')
   .post(User.postUser)

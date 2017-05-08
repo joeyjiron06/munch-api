@@ -41,10 +41,6 @@ class MunchAPI {
     });
   }
 
-  static cookieHeader(token) {
-    return {cookie:`munchtoken=${token}`};
-  }
-
   static postUser(user) {
     return MunchAPI.post('/v1/user', user);
   }
@@ -89,6 +85,10 @@ class MunchAPI {
 
   static removeFromMyFeeds(feedId, munchtoken) {
     return MunchAPI.fetch('/v1/me/feeds', 'DELETE', {id:feedId}, {cookie:`munchtoken=${munchtoken}`});
+  }
+
+  static getFeed(id) {
+    return MunchAPI.fetch(`/v1/feeds/${id}`, 'GET');
   }
 
   static authenticate(email, password) {
