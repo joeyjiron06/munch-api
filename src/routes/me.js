@@ -1,5 +1,6 @@
 const Feed = require('../models/feed');
 const User = require('../models/user');
+const ERROR_MESSAGES = require('../utils/error-messages');
 
 /**
  * GET /me/feeds
@@ -42,7 +43,7 @@ exports.addFeed = function(req, res) {
     .catch(() => {
       res.status(400).json({
         errors : {
-          id : 'You must supply a valid id'
+          id : ERROR_MESSAGES.INVALID_ID
         }
       });
     });
@@ -67,7 +68,7 @@ exports.deleteFeed = function (req, res) {
   if (originalLength === user.feeds.length) {
     res.status(400).json({
       errors : {
-        id : 'User does not have that id saved in the list'
+        id : ERROR_MESSAGES.NOT_A_SAVED_FEED_ID
       }
     })
   } else {

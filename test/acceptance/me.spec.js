@@ -3,7 +3,7 @@ const config = require('../../src/config');
 const MockMongoose = require('../lib/mock-mongoose');
 const MunchAPI = require('../lib/munch-api');
 const requireAuth = require('../lib/require-auth');
-
+const ERROR_MESSAGES = require('../../src/utils/error-messages');
 
 describe('Me API', () => {
   let user;
@@ -71,7 +71,7 @@ describe('Me API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.be.equal('You must supply a valid id');
+          expect(res.body.errors.id).to.be.equal(ERROR_MESSAGES.INVALID_ID);
         });
     });
 
@@ -82,7 +82,7 @@ describe('Me API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.be.equal('You must supply a valid id');
+          expect(res.body.errors.id).to.be.equal(ERROR_MESSAGES.INVALID_ID);
         });
     });
 
@@ -112,7 +112,7 @@ describe('Me API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.equal('User does not have that id saved in the list');
+          expect(res.body.errors.id).to.equal(ERROR_MESSAGES.NOT_A_SAVED_FEED_ID);
         });
     });
 
