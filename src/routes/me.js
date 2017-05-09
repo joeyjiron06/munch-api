@@ -2,7 +2,6 @@ const Feed = require('../models/feed');
 const User = require('../models/user');
 const jwt = require('../utils/jwt');
 const ERROR_MESSAGES = require('../utils/error-messages');
-const Emailer = require('../utils/emailer');
 
 /**
  * GET /me/feeds
