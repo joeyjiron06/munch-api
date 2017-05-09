@@ -43,54 +43,6 @@ exports.postUser = function(req, res) {
 };
 
 /**
- * POST /user/update/password
- * Gets a user
- * @param {Request} req
- * @param {Response} res
- */
-exports.updatePassword = function(req, res) {
-
-  let { id,
-        old_password,
-        new_password,
-        reset_password_token } = req.body;
-
-  let verify;
-
-  if (reset_password_token) {
-    let user = jwt.decode(reset_password_token);
-    verify = User.findUser({id:user.id});
-  } else {
-    verify = User.verifyPassword({id}, old_password);
-  }
-
-  verify
-    .then((user) => {
-      user.password = new_password;
-      return user.save();
-    })
-    .then((user) => {
-      res.status(200).json({
-        id: user._id,
-        email: user.email
-      });
-    })
-    .catch((err) => {
-      let errors = {};
-
-      if (err === User.ERROR.INVALID_PASSWORD) {
-        errors.old_password = ERROR_MESSAGES.INVALID_OLD_PASSWORD;
-      } else if (err === User.ERROR.USER_NOT_FOUND) {
-        errors.id = ERROR_MESSAGES.USER_NOT_EXISTS;
-      } else {
-        errors.new_password = ERROR_MESSAGES.INVALID_PASSWORD;
-      }
-
-      res.status(400).json({errors});
-    });
-};
-
-/**
  * POST /user/decode-email
  * Gets a user
  * @param {Request} req

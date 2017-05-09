@@ -82,60 +82,6 @@ describe('User API', () => {
     });
   });
 
-
-
-  describe('POST /user/update/password', () => {
-    let user = {email:'joeyjiron06@gmail.com', password:'password'};
-
-    it('should return a 400 and error message when an invalid previous password is sent', () => {
-      return MunchAPI.postUser(user)
-        .then((res) => {
-          return MunchAPI.updatePassword('thewrongpassword', 'someNewPassword', res.body.id);
-        })
-        .catch((res) => {
-          expect(res).to.have.status(400);
-          expect(res.body.errors.old_password).to.equal(ERROR_MESSAGES.INVALID_OLD_PASSWORD);
-          expect(res.body.errors.new_password).to.be.undefined;
-        });
-    });
-
-    it('should return a 400 and error message when in invalid new password is sent', () => {
-      return MunchAPI.postUser(user)
-        .then((res) => {
-          return MunchAPI.updatePassword('password', '2short', res.body.id);
-        })
-        .catch((res) => {
-          expect(res).to.have.status(400);
-          expect(res.body.errors.new_password).to.equal(ERROR_MESSAGES.INVALID_PASSWORD);
-          expect(res.body.errors.old_password).to.be.undefined;
-        });
-    });
-
-    it('should return a 400 with error message when given a bad user id', () => {
-      return MunchAPI.updatePassword('password', 'newPassword', 'bogusIdThatDoesntExist')
-        .catch((res) => {
-          expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.equal(ERROR_MESSAGES.USER_NOT_EXISTS);
-          expect(res.body.errors.new_password).to.be.undefined;
-          expect(res.body.errors.old_password).to.be.undefined;
-        });
-    });
-
-    it('should return a 200 and user when password is updated properly', () => {
-      let userId;
-      return MunchAPI.postUser(user)
-        .then((res) => {
-          userId = res.body.id;
-          return MunchAPI.updatePassword('password', 'newPassword', res.body.id);
-        })
-        .then((res) => {
-          expect(res).to.have.status(200);
-          expect(res.body.email).to.equal('joeyjiron06@gmail.com');
-          expect(res.body.id).to.equal(userId);
-        });
-    });
-  });
-
   describe('GET /user/decode-email', () => {
     it('should return true if email is available to use', () => {
       return MunchAPI.verifyEmail('joeyjiron06@gmail.com')
@@ -219,7 +165,7 @@ describe('User API', () => {
         .then(() => MunchAPI.resetPassword('test@test.com'))
         .then((res) => {
           let {id, token} = res.body;
-          return MunchAPI.updatePassword(null, 'newPassword', id, token);
+          return MunchAPI.updateMyPassword(null, 'newPassword', id, token);
         })
         .then((res) => {
           expect(res).to.have.status(200);

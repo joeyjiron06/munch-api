@@ -135,7 +135,6 @@ describe('Me API', () => {
     });
   });
 
-
   describe('GET /me', () => {
     requireAuth('GET', '/v1/me');
 
@@ -166,6 +165,40 @@ describe('Me API', () => {
         })
         .catch((res) => {
           expect(res).to.have.status(401);
+        });
+    });
+  });
+
+  describe('POST /me/update-password', () => {
+    requireAuth('POST', '/v1/me/update-password');
+
+    it('should return a 400 and error message when an invalid previous password is sent', () => {
+      return MunchAPI.updateMyPassword('thewrongpassword', 'someNewPassword', user.munchtoken)
+        .catch((res) => {
+            expect(res).to.have.status(400);
+            expect(res.body.errors.old_password).to.equal(ERROR_MESSAGES.INVALID_OLD_PASSWORD);
+            expect(res.body.errors.new_password).to.be.undefined;
+          });
+    });
+
+    it('should return a 400 and error message when in invalid new password is sent', () => {
+      return MunchAPI.updateMyPassword('password', '2short', user.munchtoken)
+        .then(() => {
+          throw new Error('should throw an error');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.new_password).to.equal(ERROR_MESSAGES.INVALID_PASSWORD);
+          expect(res.body.errors.old_password).to.be.undefined;
+        });
+    });
+
+    it('should return a 200 and user when password is updated properly', () => {
+      return MunchAPI.updateMyPassword('password', 'newPassword', user.munchtoken)
+      .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.email).to.equal('joeyjiron06@gmail.com');
+          expect(res.body.id).to.equal(user.id);
         });
     });
   });
