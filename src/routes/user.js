@@ -42,32 +42,6 @@ exports.postUser = function(req, res) {
     });
 };
 
-
-/**
- * GET /user
- * Gets a user
- * @param {Request} req
- * @param {Response} res
- */
-exports.getUser = function(req, res) {
-  let { id } = req.body;
-
-  User.findById(id)
-    .then((user) => {
-      res.status(200).json({
-        id : user._id,
-        email : user.email
-      });
-    })
-    .catch(() => {
-      res.status(400).json({
-        errors : {
-          id : ERROR_MESSAGES.USER_NOT_EXISTS
-        }
-      });
-    });
-};
-
 /**
  * POST /user/update/password
  * Gets a user

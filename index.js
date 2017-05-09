@@ -29,8 +29,7 @@ app.route('/v1/feeds/:id/articles')
 
 
 app.route('/v1/user')
-  .post(User.postUser)
-  .get(User.getUser);
+  .post(User.postUser);
 
 app.route('/v1/user/update/password')
   .post(User.updatePassword);
@@ -45,6 +44,7 @@ app.route('/v1/authenticate')
   .post(Auth.postAuthenticate);
 
 app.route('/v1/me')
+  .get(Auth.verifyUser, Me.getMe)
   .delete(Auth.verifyUser, Me.deleteMe);
 
 app.route('/v1/me/feeds')

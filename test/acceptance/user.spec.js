@@ -83,39 +83,6 @@ describe('User API', () => {
   });
 
 
-  describe('GET /user', () => {
-
-    it('should return 400 when not id is passed', () => {
-      return MunchAPI.getUser(null).catch((res) => {
-        expect(res).to.have.status(400);
-        expect(res.body.errors.id).to.equal(ERROR_MESSAGES.USER_NOT_EXISTS);
-      });
-    });
-
-    it('should return 400 when no user found with id', () => {
-      return MunchAPI.getUser('12fakeid').catch((res) => {
-        expect(res).to.have.status(400);
-        expect(res.body.errors.id).to.equal(ERROR_MESSAGES.USER_NOT_EXISTS);
-      });
-    });
-
-    it('should return 200 and user info when valid user id is given', () => {
-      let userId;
-      return MunchAPI.postUser({email:'jo@gmail.com', password:'password'})
-        .then((res) => {
-          userId = res.body.id;
-          return MunchAPI.getUser(userId);
-        })
-        .then((res) => {
-          let user = res.body;
-          expect(res).to.have.status(200);
-          expect(user).to.deep.equal({
-            id : userId,
-            email : 'jo@gmail.com'
-          });
-        });
-    });
-  });
 
   describe('POST /user/update/password', () => {
     let user = {email:'joeyjiron06@gmail.com', password:'password'};

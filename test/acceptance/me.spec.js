@@ -135,6 +135,23 @@ describe('Me API', () => {
     });
   });
 
+
+  describe('GET /me', () => {
+    requireAuth('GET', '/v1/me');
+
+    it('should return 200 and user info when valid user id is given', () => {
+      return MunchAPI.getMe(user.munchtoken)
+        .then((res) => {
+          let user = res.body;
+          expect(res).to.have.status(200);
+          expect(user).to.deep.equal({
+            id : user.id,
+            email : 'joeyjiron06@gmail.com'
+          });
+        });
+    });
+  });
+
   describe('DELETE /me', () => {
     requireAuth('DELETE', '/v1/me');
 
@@ -142,14 +159,13 @@ describe('Me API', () => {
       return MunchAPI.deleteMe(user.munchtoken)
         .then((res) => {
           expect(res).to.have.status(200);
-          return MunchAPI.getUser(user.id);
+          return MunchAPI.getMe(user.munchtoken);
         })
         .then(() => {
           throw new Error('should be rejected');
         })
         .catch((res) => {
-          expect(res).to.have.status(400);
-          expect(res.body.errors.id).to.equal(ERROR_MESSAGES.USER_NOT_EXISTS);
+          expect(res).to.have.status(401);
         });
     });
   });

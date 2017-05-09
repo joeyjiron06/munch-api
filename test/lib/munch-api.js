@@ -45,10 +45,6 @@ class MunchAPI {
     return MunchAPI.post('/v1/user', user);
   }
 
-  static getUser(id) {
-    return MunchAPI.get('/v1/user', {id});
-  }
-
   static verifyEmail(email) {
     return MunchAPI.post('/v1/user/decode-email', {email});
   }
@@ -66,6 +62,9 @@ class MunchAPI {
     });
   }
 
+  static getMe(token) {
+    return MunchAPI.fetch('/v1/me', 'GET', null, {cookie:`munchtoken=${token}`});
+  }
 
   static deleteMe(token) {
     let headers = token ? {cookie:`munchtoken=${token}`} : null;

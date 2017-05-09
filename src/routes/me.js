@@ -77,6 +77,22 @@ exports.deleteFeed = function (req, res) {
 
 };
 
+
+/**
+ * GEt /me
+ * The the authed user
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.getMe = function(req, res) {
+  let { user } = req;
+
+  res.status(200).json({
+    id : user._id,
+    email : user.email
+  });
+};
+
 /**
  * DELETE /me
  * Remove a user from the database
