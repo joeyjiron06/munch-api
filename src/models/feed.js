@@ -36,10 +36,4 @@ FeedSchema.methods.toJSON = function() {
   };
 };
 
-
-// FeedSchema.statics.ERROR = {
-//   INVALID_URL : 'INVALID_URL',
-//   INVALID_TITLE : 'INVALID_TITLE'
-// };
-
 module.exports = mongoose.model('Feed', FeedSchema);

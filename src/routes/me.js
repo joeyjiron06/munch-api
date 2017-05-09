@@ -30,10 +30,6 @@ exports.addFeed = function(req, res) {
 
   Feed.findById(feedId)
     .then((feed) => {
-      if (!feed) {
-        throw new Error('no feed found');
-      }
-
       user.feeds.push(feed._id);
       return user.save()
         .then(() => {
