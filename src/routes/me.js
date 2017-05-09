@@ -76,3 +76,25 @@ exports.deleteFeed = function (req, res) {
 
 
 };
+
+/**
+ * DELETE /me
+ * Remove a user from the database
+ * @param {Request} req
+ * @param {Response} res
+ */
+exports.deleteMe = function(req, res) {
+  let { id } = req.user;
+
+  User.remove({_id:id})
+    .then(() => {
+      res.status(200).json({});
+    })
+    .catch(() => {
+      res.status(400).json({
+        errors : {
+          id: ERROR_MESSAGES.INVALID_ID
+        }
+      });
+    });
+};

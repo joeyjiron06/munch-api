@@ -45,11 +45,6 @@ class MunchAPI {
     return MunchAPI.post('/v1/user', user);
   }
 
-  static deleteUser(token) {
-    let headers = token ? {cookie:`munchtoken=${token}`} : null;
-    return MunchAPI.del('/v1/user', {}, headers);
-  }
-
   static getUser(id) {
     return MunchAPI.get('/v1/user', {id});
   }
@@ -69,6 +64,12 @@ class MunchAPI {
       new_password: newPassword,
       reset_password_token: resetPasswordToken
     });
+  }
+
+
+  static deleteMe(token) {
+    let headers = token ? {cookie:`munchtoken=${token}`} : null;
+    return MunchAPI.del('/v1/me', {}, headers);
   }
 
   static getMyFeeds(munchtoken) {

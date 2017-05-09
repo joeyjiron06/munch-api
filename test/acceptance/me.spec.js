@@ -134,4 +134,23 @@ describe('Me API', () => {
         });
     });
   });
+
+  describe('DELETE /me', () => {
+    requireAuth('DELETE', '/v1/me');
+
+    it('should delete a saved user if a valid json webtoken is present in the request', () => {
+      return MunchAPI.deleteMe(user.munchtoken)
+        .then((res) => {
+          expect(res).to.have.status(200);
+          return MunchAPI.getUser(user.id);
+        })
+        .then(() => {
+          throw new Error('should be rejected');
+        })
+        .catch((res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.errors.id).to.equal(ERROR_MESSAGES.USER_NOT_EXISTS);
+        });
+    });
+  });
 });

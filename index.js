@@ -30,8 +30,7 @@ app.route('/v1/feeds/:id/articles')
 
 app.route('/v1/user')
   .post(User.postUser)
-  .get(User.getUser)
-  .delete(Auth.verifyUser, User.deleteUser);
+  .get(User.getUser);
 
 app.route('/v1/user/update/password')
   .post(User.updatePassword);
@@ -45,6 +44,8 @@ app.route('/v1/user/decode-email')
 app.route('/v1/authenticate')
   .post(Auth.postAuthenticate);
 
+app.route('/v1/me')
+  .delete(Auth.verifyUser, Me.deleteMe);
 
 app.route('/v1/me/feeds')
   .get(Auth.verifyUser, Me.getFeeds)
