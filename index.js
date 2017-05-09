@@ -36,7 +36,7 @@ app.route('/v1/user')
 app.route('/v1/user/reset-password')
   .post(User.resetPassword);
 
-app.route('/v1/user/decode-email')
+app.route('/v1/user/verify-email')
   .post(User.verifyEmail);
 
 

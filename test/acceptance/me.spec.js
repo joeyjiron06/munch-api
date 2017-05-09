@@ -1,4 +1,5 @@
 const { expect }= require('chai');
+const MailDev = require('maildev');
 const config = require('../../src/config');
 const MockMongoose = require('../lib/mock-mongoose');
 const MunchAPI = require('../lib/munch-api');

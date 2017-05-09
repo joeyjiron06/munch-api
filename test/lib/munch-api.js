@@ -46,7 +46,7 @@ class MunchAPI {
   }
 
   static verifyEmail(email) {
-    return MunchAPI.post('/v1/user/decode-email', {email});
+    return MunchAPI.post('/v1/user/verify-email', {email});
   }
 
   static resetPassword(email) {
