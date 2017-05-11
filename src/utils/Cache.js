@@ -1,7 +1,7 @@
 class Cache {
 
   /**
-   * @param {object|undefined} options
+   * @param {object} [options]
    * @param {number} options.limit - the size limit of the cache
    */
   constructor(options) {
@@ -45,7 +45,12 @@ class Cache {
   get(key) {
     let hashItem = this.hash[key];
 
-    if (!hashItem || !this.isAlive(hashItem)) {
+    if (!hashItem) {
+      return undefined;
+    }
+
+    let delta = Date.now() - hashItem.lastUsed;
+    if (delta > hashItem.ttl) {
       return undefined;
     }
 
@@ -54,19 +59,14 @@ class Cache {
   }
 
 
-  isAlive(hashItem) {
-    let delta = Date.now() - hashItem.lastUsed;
-    return (delta <= hashItem.ttl);
-  }
-
   findOldestKey() {
-    let oldestHash;
+    let oldestTime;
     let oldestKey;
 
     Object.getOwnPropertyNames(this.hash).forEach((key) => {
       let item = this.hash[key];
-      if (!oldestHash || item.lastUsed < oldestHash.lastUsed) {
-        oldestHash = item;
+      if (!oldestTime || item.lastUsed < oldestTime) {
+        oldestTime = item.lastUsed;
         oldestKey = key;
       }
     });
