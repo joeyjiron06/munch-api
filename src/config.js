@@ -8,6 +8,10 @@ const {
 const config = {
   jwtSecret : JWT_SECRET || fs.readFileSync('.jwt.secret').toString(),
   port : PORT || 8080,
+  feedCache : {
+    ttl : 4 * 60 * 60 * 1000, // 4 hours
+    limit : 500
+  },
   nodemailer : {}
 };
 

@@ -1,9 +1,25 @@
 const Feeds = require('../Feeds');
 const Feed = require('../models/feed');
+const Cache = require('../utils/cache');
+const config = require('../config');
 const ERROR_MESSAGES = require('../utils/error-messages');
 
 const FEED_NOT_FOUND = 'FEED_NOT_FOUND';
 const FEED_HTTP_ERROR = 'FEED_HTTP_ERROR';
+const feedCache = new Cache({limit:config.feedCache.limit});
+
+
+function fetchFeed(url) {
+  let feed = feedCache.get(url);
+  if (feed) {
+    return Promise.resolve(feed);
+  } else {
+    return Feeds.fetch(url).then((feed) => {
+      feedCache.set(url, feed);
+      return feed;
+    });
+  }
+}
 
 /**
  * GET /feed
@@ -90,7 +106,7 @@ exports.getArticles = function(req, res) {
     })
     .then((feed) => {
       foundFeed = feed;
-      return Feeds.fetch(feed.url);
+      return fetchFeed(feed.url);
     })
     .then((feed) => {
       foundFeed = foundFeed.toJSON();
