@@ -90,6 +90,20 @@ exports.addFeed = function(req, res) {
 };
 
 /**
+ * GET /feeds/all
+ * Get all the feeds in the database
+ * @param req
+ * @param res
+ */
+exports.getAllFeeds = function(req, res) {
+  Feed.find({})
+    .then((feeds) => {
+      feeds = feeds.map((feed) => feed.toJSON());
+      res.send(200, feeds);
+    });
+};
+
+/**
  * GET /feeds/:id/articles
  * Get the current articles of a certain feed
  * @param req

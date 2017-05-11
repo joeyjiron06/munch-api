@@ -22,6 +22,7 @@ server.use(restify.bodyParser(), (req, res, next) => {
 
 // FEEDS
 server.put('/v1/feeds', Feed.addFeed);
+server.get('/v1/feeds/all', Feed.getAllFeeds);
 server.get('/v1/feeds/:id', Feed.getFeed);
 server.get('/v1/feeds/:id/articles', Feed.getArticles);
 
