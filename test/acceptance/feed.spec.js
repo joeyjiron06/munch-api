@@ -151,6 +151,15 @@ describe('Feed API', () => {
   });
 
   describe('GET /feeds/all', () => {
+    it('should return an empty array when not feeds are in the database', () => {
+      return MunchAPI.getAllFeeds()
+        .then((res) => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an.instanceOf(Array);
+          expect(res.body).to.have.length(0);
+        })
+    });
+
     it('should return an array of all the feeds that have been added', () => {
       return MunchAPI.addFeed({url:'https://google.com/rss.xml', title : 'Google'})
         .then(() => {
