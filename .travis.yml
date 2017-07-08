@@ -10,7 +10,7 @@ install:
 script:
   - export DEBUG=*
   - npm -v
-  - npm run test
+  - npm run test-coverage
 env:
   - CXX=g++-4.8
 cache:
