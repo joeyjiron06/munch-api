@@ -6,7 +6,7 @@ before_install:
 install:
   - npm install
 script:
-  - npm run test-coverage
+  - npm run test
 env:
   - CXX=g++-4.8
 cache:
