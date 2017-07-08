@@ -10,5 +10,14 @@ process.env.NODE_ENV = 'test';
 
 // before tests run start start mongodb process which allows mongoose to connect to it
 prepare(function (done) {
-  MockMongoose.initialize().then(() => done());
+  console.log('initializing mongodb...');
+  MockMongoose.initialize()
+    .then(() => {
+      console.log('DONE initializing mongodb');
+      done();
+    })
+    .catch((err) => {
+      console.error('error initializing mongodb');
+      throw err;
+    });
 });
