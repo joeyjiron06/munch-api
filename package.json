@@ -32,6 +32,6 @@
     "maildev": "^0.14.0",
     "mocha": "^3.2.0",
     "mocha-prepare": "0.0.1",
-    "mongodb-prebuilt": "^6.3.3"
+    "mongodb-prebuilt": "^6.3.1"
   }
 }
