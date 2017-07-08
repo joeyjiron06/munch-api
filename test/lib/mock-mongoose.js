@@ -66,7 +66,7 @@ exports.initialize = function() {
 
   // issue with printing complete % in CI/CD environment when testing
   // we make this a NOOP function to avoid the printing to the console.
-  mongoBin.mongoDBPrebuilt.mongoDBDownload.printDownloadProgress = function() {};
+  mongod.mongoBin.mongoDBPrebuilt.mongoDBDownload.printDownloadProgress = function() {};
 
   // FOR OFFLINE mode
   // mongod.mongoBin.mongoDBPrebuilt.binPath = '/Users/jjiron/.mongodb-prebuilt/mongodb-download/a811facba94753a2eba574f446561b7e/mongodb-macOS-x86_64-3.5.5-13-g00ee4f5/bin';
