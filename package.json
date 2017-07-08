@@ -7,7 +7,7 @@
     "start": "node index.js",
     "test": "mocha test/**/*.spec.js",
     "test-acceptance": "mocha test/acceptance/**.spec.js",
-    "test-coverage" : "istanbul cover mocha --report lcovonly -- test/**/*.spec.js && codecov",
+    "test-coverage": "istanbul cover mocha --report lcovonly -- test/**/*.spec.js && codecov",
     "test-unit": "mocha test/unit/**.spec.js"
   },
   "author": "",
@@ -32,6 +32,6 @@
     "maildev": "^0.14.0",
     "mocha": "^3.2.0",
     "mocha-prepare": "0.0.1",
-    "mockgoose": "^7.0.7"
+    "mongodb-prebuilt": "^6.3.3"
   }
 }
