@@ -9,6 +9,7 @@ chai.use(chaiHttp);
 prepare(function (done) {
 
   // change the config for testing
+  config.jwtSecret = 'testsecret';
   config.nodemailer = {
     host: 'localhost',
     secure: false,
